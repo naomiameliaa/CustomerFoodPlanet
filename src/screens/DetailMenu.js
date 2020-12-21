@@ -12,7 +12,8 @@ import axios from 'axios';
 import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import theme from '../theme';
-import {normalize, getData, alertMessage} from '../utils';
+import {normalize, getData, alertMessage, storeData} from '../utils';
+import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -116,6 +117,7 @@ function DetailMenu({route, navigation}) {
   const [qty, setQty] = React.useState(1);
   const [isLoading, setIsLoading] = React.useState(false);
   const [isEdit, setIsEdit] = React.useState(false);
+  const {signOutGuest, signOut} = React.useContext(AuthContext);
   const {
     menuId,
     menuName,
@@ -129,6 +131,28 @@ function DetailMenu({route, navigation}) {
     if (qty > 0) {
       setQty(qty - 1);
     }
+  }
+
+  const logout = async () => {
+    const dataGuest = await getData('guestData');
+    const dataGuestUpdated = {
+      ...dataGuest,
+      isLogin: false,
+    };
+    storeData('guestData', dataGuestUpdated);
+    await signOutGuest(dataGuestUpdated);
+  };
+
+  const sessionTimedOut = async () => {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
   }
 
   const getDataUser = async () => {
@@ -188,6 +212,9 @@ function DetailMenu({route, navigation}) {
       }
     } catch (error) {
       setErrorMessage('Something went wrong');
+      if(error.response.status === 401) {
+        await sessionTimedOut();
+      }
     }
     setIsLoading(false);
   }
@@ -209,12 +236,16 @@ function DetailMenu({route, navigation}) {
         });
       }
     } catch (error) {
-      alertMessage({
-        titleMessage: 'Error',
-        bodyMessage: 'Failed edit cart',
-        btnText: 'Try Again',
-        btnCancel: false,
-      });
+      if(error.response.status === 401) {
+        await sessionTimedOut();
+      }else {
+        alertMessage({
+          titleMessage: 'Error',
+          bodyMessage: 'Failed edit cart',
+          btnText: 'Try Again',
+          btnCancel: false,
+        });
+      }
     }
     setIsLoading(false);
   }
@@ -236,12 +267,16 @@ function DetailMenu({route, navigation}) {
         });
       }
     } catch (error) {
-      alertMessage({
-        titleMessage: 'Error',
-        bodyMessage: 'Failed add to cart',
-        btnText: 'Try Again',
-        btnCancel: false,
-      });
+      if(error.response.status === 401) {
+        await sessionTimedOut();
+      }else {
+        alertMessage({
+          titleMessage: 'Error',
+          bodyMessage: 'Failed add to cart',
+          btnText: 'Try Again',
+          btnCancel: false,
+        });
+      }
     }
     setIsLoading(false);
   }
@@ -307,12 +342,16 @@ function DetailMenu({route, navigation}) {
         });
       }
     } catch (error) {
-      alertMessage({
-        titleMessage: 'Error',
-        bodyMessage: 'Failed remove from cart',
-        btnText: 'Try Again',
-        btnCancel: false,
-      });
+      if(error.response.status === 401) {
+        await sessionTimedOut();
+      }else {
+        alertMessage({
+          titleMessage: 'Error',
+          bodyMessage: 'Failed remove from cart',
+          btnText: 'Try Again',
+          btnCancel: false,
+        });
+      }
     }
     setIsLoading(false);
   }

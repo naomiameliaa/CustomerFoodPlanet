@@ -15,8 +15,9 @@ import {RNCamera} from 'react-native-camera';
 import axios from 'axios';
 import theme from '../theme';
 import SpinnerKit from '../components/SpinnerKit';
-import {getData, normalize} from '../utils';
+import {getData, normalize, alertMessage, storeData} from '../utils';
 import ButtonKit from '../components/ButtonKit';
+import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -114,6 +115,7 @@ function OrderPage({navigation}) {
   const [pastOrder, setPastOrder] = React.useState([]);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [index, setIndex] = React.useState(0);
+  const {signOutGuest, signOut} = React.useContext(AuthContext);
   const [routes] = React.useState([
     {key: 'ongoing', title: 'Ongoing Order'},
     {key: 'past', title: 'Past Order'},
@@ -324,6 +326,28 @@ function OrderPage({navigation}) {
     </View>
   );
 
+  const logout = async () => {
+    const dataGuest = await getData('guestData');
+    const dataGuestUpdated = {
+      ...dataGuest,
+      isLogin: false,
+    };
+    storeData('guestData', dataGuestUpdated);
+    await signOutGuest(dataGuestUpdated);
+  };
+
+  const sessionTimedOut = async () => {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
+
   const getDataUser = async () => {
     const dataUser = await getData('userData');
     if (dataUser !== null) {
@@ -380,6 +404,9 @@ function OrderPage({navigation}) {
       }
     } catch (error) {
       setErrorMessage('Something went wrong');
+      if(error.response.status === 401) {
+        await sessionTimedOut();
+      }
     }
     setIsLoadingOngoing(false);
   }
@@ -396,6 +423,9 @@ function OrderPage({navigation}) {
       }
     } catch (error) {
       setErrorMessage('Something went wrong');
+      if(error.response.status === 401) {
+        await sessionTimedOut();
+      }
     }
     setIsLoadingPast(false);
   }

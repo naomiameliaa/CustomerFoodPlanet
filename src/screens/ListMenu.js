@@ -14,8 +14,9 @@ import {
 import axios from 'axios';
 import ButtonKit from '../components/ButtonKit';
 import theme from '../theme';
-import {normalize} from '../utils';
+import {normalize, alertMessage, getData, storeData} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
+import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -120,6 +121,29 @@ function ListMenu({route, navigation}) {
   const [listMenu, setListMenu] = React.useState([]);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const {signOutGuest, signOut} = React.useContext(AuthContext);
+
+  const logout = async () => {
+    const dataGuest = await getData('guestData');
+    const dataGuestUpdated = {
+      ...dataGuest,
+      isLogin: false,
+    };
+    storeData('guestData', dataGuestUpdated);
+    await signOutGuest(dataGuestUpdated);
+  };
+
+  const sessionTimedOut = async () => {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
 
   const renderBullet = (key, length) => {
     if (key < length - 1) {
@@ -165,6 +189,9 @@ function ListMenu({route, navigation}) {
       }
     } catch (error) {
       setErrorMessage('Something went wrong');
+      if(error.response.status === 401) {
+        await sessionTimedOut();
+      }
     }
     setIsLoading(false);
   }

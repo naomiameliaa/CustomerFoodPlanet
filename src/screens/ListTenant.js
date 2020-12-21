@@ -16,8 +16,9 @@ import ButtonKit from '../components/ButtonKit';
 import Title from '../components/Title';
 import theme from '../theme';
 import {defineImageCategory} from '../components/CategoryImage';
-import {getData, normalize} from '../utils';
+import {getData, normalize, alertMessage, storeData} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
+import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -123,6 +124,29 @@ function ListTenant({route, navigation}) {
   const [searchWord, onChangeSearchWord] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const {foodcourtId, foodcourtName} = route.params;
+  const {signOutGuest, signOut} = React.useContext(AuthContext);
+
+  const logout = async () => {
+    const dataGuest = await getData('guestData');
+    const dataGuestUpdated = {
+      ...dataGuest,
+      isLogin: false,
+    };
+    storeData('guestData', dataGuestUpdated);
+    await signOutGuest(dataGuestUpdated);
+  };
+
+  const sessionTimedOut = async () => {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
 
   const renderBullet = (key, length) => {
     if (key < length - 1) {
@@ -157,6 +181,9 @@ function ListTenant({route, navigation}) {
       }
     } catch (error) {
       setErrorMessage('Something went wrong');
+      if(error.response.status === 401) {
+        await sessionTimedOut();
+      }
     }
     setIsLoading(false);
   }
@@ -261,6 +288,9 @@ function ListTenant({route, navigation}) {
       }
     } catch (error) {
       setErrorMessage('Something went wrong');
+      if(error.response.status === 401) {
+        await sessionTimedOut();
+      }
     }
     setIsLoading(false);
   }

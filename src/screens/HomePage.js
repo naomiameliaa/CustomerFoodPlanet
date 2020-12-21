@@ -12,10 +12,11 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import Title from '../components/Title';
-import {getData, normalize} from '../utils';
+import {getData, normalize, storeData, alertMessage} from '../utils';
 import theme from '../theme';
 import SpinnerKit from '../components/SpinnerKit';
 import ButtonKit from '../components/ButtonKit';
+import {AuthContext} from '../../context';
 
 const styles = StyleSheet.create({
   container: {
@@ -84,6 +85,18 @@ function HomePage({navigation}) {
   const [listFoodCourt, setListFoodCourt] = React.useState([]);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const {signOutGuest, signOut} = React.useContext(AuthContext);
+
+  const logout = async () => {
+    const dataGuest = await getData('guestData');
+    const dataGuestUpdated = {
+      ...dataGuest,
+      isLogin: false,
+    };
+    storeData('guestData', dataGuestUpdated);
+    await signOutGuest(dataGuestUpdated);
+
+  };
 
   async function getListFoodCourt() {
     setIsLoading(true);
@@ -96,7 +109,17 @@ function HomePage({navigation}) {
       }
     } catch (error) {
       setErrorMessage('Something went wrong');
-      console.log('error:', error);
+      if(error.response.status === 401) {
+        alertMessage({
+          titleMessage: 'Session Timeout',
+          bodyMessage: 'Please re-login',
+          btnText: 'OK',
+          onPressOK: () => {
+            logout();
+          },
+          btnCancel: false,
+        });
+      }
     }
     setIsLoading(false);
   }

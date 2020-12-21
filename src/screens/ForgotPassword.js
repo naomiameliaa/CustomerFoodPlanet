@@ -12,7 +12,8 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {alertMessage} from '../utils';
+import {alertMessage, getData, storeData} from '../utils';
+import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -83,6 +84,29 @@ const styles = StyleSheet.create({
 function ForgotPassword({navigation}) {
   const [email, onChangeEmail] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const {signOutGuest, signOut} = React.useContext(AuthContext);
+
+  const logout = async () => {
+    const dataGuest = await getData('guestData');
+    const dataGuestUpdated = {
+      ...dataGuest,
+      isLogin: false,
+    };
+    storeData('guestData', dataGuestUpdated);
+    await signOutGuest(dataGuestUpdated);
+  };
+
+  const sessionTimedOut = async () => {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
 
   async function sendEmail() {
     setIsLoading(true);
@@ -99,12 +123,16 @@ function ForgotPassword({navigation}) {
         });
       }
     } catch (error) {
-      alertMessage({
-        titleMessage: 'Failed',
-        bodyMessage: 'Please try again later',
-        btnText: 'Try Again',
-        btnCancel: true,
-      });
+      if(error.response.status === 401) {
+        await sessionTimedOut();
+      }else {
+        alertMessage({
+          titleMessage: 'Failed',
+          bodyMessage: 'Please try again later',
+          btnText: 'Try Again',
+          btnCancel: true,
+        });
+      }
     }
     setIsLoading(false);
   }

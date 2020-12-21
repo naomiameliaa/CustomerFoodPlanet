@@ -12,10 +12,11 @@ import {
 import axios from 'axios';
 import Title from '../components/Title';
 import SpinnerKit from '../components/SpinnerKit';
-import {normalize, getData, alertMessage} from '../utils';
+import {normalize, getData, alertMessage, storeData} from '../utils';
 import ButtonText from '../components/ButtonText';
 import RadioButton from '../components/RadioButton';
 import theme from '../theme';
+import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -126,6 +127,29 @@ function CartPage({navigation}) {
   const [seatCapacity, onChangeSeatCapacity] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState('');
+  const {signOutGuest, signOut} = React.useContext(AuthContext);
+
+  const logout = async () => {
+    const dataGuest = await getData('guestData');
+    const dataGuestUpdated = {
+      ...dataGuest,
+      isLogin: false,
+    };
+    storeData('guestData', dataGuestUpdated);
+    await signOutGuest(dataGuestUpdated);
+  };
+
+  const sessionTimedOut = async () => {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
 
   const getDataUser = async () => {
     const dataUser = await getData('userData');
@@ -189,6 +213,9 @@ function CartPage({navigation}) {
       }
     } catch (error) {
       setErrorMessage('Something went wrong');
+      if(error.response.status === 401) {
+        await sessionTimedOut();
+      }
     }
     setIsLoading(false);
   }
@@ -235,12 +262,16 @@ function CartPage({navigation}) {
         });
       }
     } catch (error) {
-      alertMessage({
-        titleMessage: 'Error',
-        bodyMessage: 'Failed create order, Please try again!',
-        btnText: 'Try Again',
-        btnCancel: false,
-      });
+      if(error.response.status === 401) {
+        await sessionTimedOut();
+      }else {
+        alertMessage({
+          titleMessage: 'Error',
+          bodyMessage: 'Failed create order, Please try again!',
+          btnText: 'Try Again',
+          btnCancel: false,
+        });
+      }
     }
     setIsLoading(false);
   }

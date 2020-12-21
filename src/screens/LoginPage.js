@@ -13,7 +13,8 @@ import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import {AuthContext} from '../../context';
-import {storeData, alertMessage} from '../utils';
+import {storeData, alertMessage, getUserId} from '../utils';
+import messaging from '@react-native-firebase/messaging';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -101,6 +102,22 @@ function LoginPage({navigation}) {
     }
   };
 
+  async function saveFcmToken() {
+    const fcmToken = await messaging().getToken();
+    if (fcmToken) {
+      const userId = await getUserId();
+      try {
+        const response = await axios.get(
+            'https://food-planet.herokuapp.com/users/saveNotificationToken?userId=${userId}&token=${fcmToken}',
+        );
+      } catch (error) {
+
+      }
+    } else {
+      console.log('Failed', 'No token received');
+    }
+  }
+
   async function login() {
     setIsLoading(true);
     try {
@@ -118,6 +135,7 @@ function LoginPage({navigation}) {
       );
       if (response.data.msg === 'Login success') {
         storeData('userData', response.data.object);
+        saveFcmToken();
         signIn();
       }
     } catch (error) {
