@@ -13,8 +13,7 @@ import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import {AuthContext} from '../../context';
-import {getData, storeData, alertMessage, removeData, saveFcmToken} from '../utils';
-import messaging from '@react-native-firebase/messaging';
+import {getData, storeData, alertMessage, saveFcmToken} from '../utils';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 

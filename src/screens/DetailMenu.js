@@ -12,7 +12,7 @@ import axios from 'axios';
 import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import theme from '../theme';
-import {normalize, getData, alertMessage, storeData} from '../utils';
+import {normalize, getData, alertMessage, storeData, removeData} from '../utils';
 import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
@@ -134,16 +134,22 @@ function DetailMenu({route, navigation}) {
   }
 
   const logout = async () => {
+    const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
-    const dataGuestUpdated = {
-      ...dataGuest,
-      isLogin: false,
-    };
-    storeData('guestData', dataGuestUpdated);
-    await signOutGuest(dataGuestUpdated);
+    if (dataUser !== null) {
+      await removeData('userData');
+      await signOut();
+    } else {
+      const dataGuestUpdated = {
+        ...dataGuest,
+        isLogin: false,
+      };
+      await storeData('guestData', dataGuestUpdated);
+      await signOutGuest(dataGuestUpdated);
+    }
   };
 
-  const sessionTimedOut = async () => {
+  function sessionTimedOut () {
     alertMessage({
       titleMessage: 'Session Timeout',
       bodyMessage: 'Please re-login',
@@ -213,7 +219,7 @@ function DetailMenu({route, navigation}) {
     } catch (error) {
       setErrorMessage('Something went wrong');
       if(error.response.status === 401) {
-        await sessionTimedOut();
+        sessionTimedOut();
       }
     }
     setIsLoading(false);
@@ -237,7 +243,7 @@ function DetailMenu({route, navigation}) {
       }
     } catch (error) {
       if(error.response.status === 401) {
-        await sessionTimedOut();
+        sessionTimedOut();
       }else {
         alertMessage({
           titleMessage: 'Error',
@@ -268,7 +274,7 @@ function DetailMenu({route, navigation}) {
       }
     } catch (error) {
       if(error.response.status === 401) {
-        await sessionTimedOut();
+        sessionTimedOut();
       }else {
         alertMessage({
           titleMessage: 'Error',
@@ -343,7 +349,7 @@ function DetailMenu({route, navigation}) {
       }
     } catch (error) {
       if(error.response.status === 401) {
-        await sessionTimedOut();
+        sessionTimedOut();
       }else {
         alertMessage({
           titleMessage: 'Error',

@@ -16,7 +16,7 @@ import ButtonKit from '../components/ButtonKit';
 import Title from '../components/Title';
 import theme from '../theme';
 import {defineImageCategory} from '../components/CategoryImage';
-import {getData, normalize, alertMessage, storeData} from '../utils';
+import {getData, normalize, alertMessage, storeData, removeData} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
 import {AuthContext} from '../../context';
 
@@ -127,16 +127,22 @@ function ListTenant({route, navigation}) {
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
   const logout = async () => {
+    const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
-    const dataGuestUpdated = {
-      ...dataGuest,
-      isLogin: false,
-    };
-    storeData('guestData', dataGuestUpdated);
-    await signOutGuest(dataGuestUpdated);
+    if (dataUser !== null) {
+      await removeData('userData');
+      await signOut();
+    } else {
+      const dataGuestUpdated = {
+        ...dataGuest,
+        isLogin: false,
+      };
+      await storeData('guestData', dataGuestUpdated);
+      await signOutGuest(dataGuestUpdated);
+    }
   };
 
-  const sessionTimedOut = async () => {
+  function sessionTimedOut () {
     alertMessage({
       titleMessage: 'Session Timeout',
       bodyMessage: 'Please re-login',
@@ -182,7 +188,7 @@ function ListTenant({route, navigation}) {
     } catch (error) {
       setErrorMessage('Something went wrong');
       if(error.response.status === 401) {
-        await sessionTimedOut();
+        sessionTimedOut();
       }
     }
     setIsLoading(false);
@@ -289,7 +295,7 @@ function ListTenant({route, navigation}) {
     } catch (error) {
       setErrorMessage('Something went wrong');
       if(error.response.status === 401) {
-        await sessionTimedOut();
+        sessionTimedOut();
       }
     }
     setIsLoading(false);

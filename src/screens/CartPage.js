@@ -12,7 +12,7 @@ import {
 import axios from 'axios';
 import Title from '../components/Title';
 import SpinnerKit from '../components/SpinnerKit';
-import {normalize, getData, alertMessage, storeData} from '../utils';
+import {normalize, getData, alertMessage, storeData, removeData} from '../utils';
 import ButtonText from '../components/ButtonText';
 import RadioButton from '../components/RadioButton';
 import theme from '../theme';
@@ -130,13 +130,19 @@ function CartPage({navigation}) {
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
   const logout = async () => {
+    const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
-    const dataGuestUpdated = {
-      ...dataGuest,
-      isLogin: false,
-    };
-    storeData('guestData', dataGuestUpdated);
-    await signOutGuest(dataGuestUpdated);
+    if (dataUser !== null) {
+      await removeData('userData');
+      await signOut();
+    } else {
+      const dataGuestUpdated = {
+        ...dataGuest,
+        isLogin: false,
+      };
+      await storeData('guestData', dataGuestUpdated);
+      await signOutGuest(dataGuestUpdated);
+    }
   };
 
   const sessionTimedOut = async () => {

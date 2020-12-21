@@ -230,6 +230,18 @@ function ProfilePage({navigation}) {
     setisLoadingLogout(false);
   }
 
+  function sessionTimedOut () {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        checkUserGuest() === 'member' ? signOutMember() : signOutGuest(checkUserGuest());
+      },
+      btnCancel: false,
+    });
+  }
+
   async function getProfile() {
     setIsLoadingLogin(true);
     const userId = await getUserGuestData();
@@ -241,6 +253,9 @@ function ProfilePage({navigation}) {
         setDataProfile(response.data.object);
       }
     } catch (error) {
+      if(error.response.data.status) {
+        sessionTimedOut();
+      }
       console.log(error);
     }
     setIsLoadingLogin(false);

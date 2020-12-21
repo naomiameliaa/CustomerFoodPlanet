@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import Title from '../components/Title';
-import {getData, normalize, storeData, alertMessage} from '../utils';
+import {getData, normalize, storeData, alertMessage, removeData} from '../utils';
 import theme from '../theme';
 import SpinnerKit from '../components/SpinnerKit';
 import ButtonKit from '../components/ButtonKit';
@@ -88,14 +88,19 @@ function HomePage({navigation}) {
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
   const logout = async () => {
+    const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
-    const dataGuestUpdated = {
-      ...dataGuest,
-      isLogin: false,
-    };
-    storeData('guestData', dataGuestUpdated);
-    await signOutGuest(dataGuestUpdated);
-
+    if (dataUser !== null) {
+      await removeData('userData');
+      await signOut();
+    } else {
+      const dataGuestUpdated = {
+        ...dataGuest,
+        isLogin: false,
+      };
+      await storeData('guestData', dataGuestUpdated);
+      await signOutGuest(dataGuestUpdated);
+    }
   };
 
   async function getListFoodCourt() {
