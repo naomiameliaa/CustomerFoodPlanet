@@ -253,7 +253,7 @@ function ProfilePage({navigation}) {
         setDataProfile(response.data.object);
       }
     } catch (error) {
-      if(error.response.data.status) {
+      if(error.response.data.status === 401) {
         sessionTimedOut();
       }
       console.log(error);

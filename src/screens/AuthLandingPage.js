@@ -233,7 +233,7 @@ function AuthLandingPage({navigation}) {
                 <View style={styles.imgWrapper}>
                   <Image
                     style={styles.imgStyle}
-                    source={require('../assets/reserved-table.png')}
+                    source={require('../assets/reserved-table.jpg')}
                     resizeMode="contain"
                   />
                 </View>
