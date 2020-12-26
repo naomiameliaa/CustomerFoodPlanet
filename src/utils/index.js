@@ -1,5 +1,7 @@
 import {Dimensions, Platform, PixelRatio, Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import messaging from '@react-native-firebase/messaging';
+import axios from 'axios';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -72,3 +74,32 @@ export const alertMessage = ({
     cancelable: btnCancel,
   });
 };
+
+export const getUserId = async () => {
+  const dataUser = await getData("userData");
+  const dataGuest = await getData("guestData");
+  if (dataUser !== null) {
+    return dataUser.userId;
+  } else {
+    return dataGuest.userId;
+  }
+}
+
+export const saveFcmToken = async () => {
+  const fcmToken = await messaging().getToken();
+  if (fcmToken) {
+    const userId = await getUserId();
+    try {
+      const response = await axios.post(
+          `https://food-planet.herokuapp.com/users/saveNotificationToken?userId=${userId}&token=${fcmToken}`,
+      );
+      if (response.data.status === true) {
+
+      }
+    } catch (error) {
+      console.log(error.response);
+    }
+  } else {
+    console.log('Failed', 'No token received');
+  }
+}

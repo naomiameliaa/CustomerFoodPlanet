@@ -13,7 +13,7 @@ import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import {AuthContext} from '../../context';
-import {storeData, alertMessage} from '../utils';
+import {storeData, alertMessage, getUserId, saveFcmToken} from '../utils';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -118,6 +118,7 @@ function LoginPage({navigation}) {
       );
       if (response.data.msg === 'Login success') {
         storeData('userData', response.data.object);
+        saveFcmToken();
         signIn();
       }
     } catch (error) {

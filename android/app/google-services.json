@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "484532011950",
-    "project_id": "foodplanet-abdc5",
-    "storage_bucket": "foodplanet-abdc5.appspot.com"
+    "project_number": "147380867452",
+    "project_id": "foodplanet-370ec",
+    "storage_bucket": "foodplanet-370ec.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:484532011950:android:e0123788da1ed7e37f7e3f",
+        "mobilesdk_app_id": "1:147380867452:android:6543080658a4f4fd6194f9",
         "android_client_info": {
           "package_name": "com.foodplanet"
         }
       },
       "oauth_client": [
         {
-          "client_id": "484532011950-qhdgpbasuaqi8trgkpioqljbgqfh002u.apps.googleusercontent.com",
+          "client_id": "147380867452-jt628d893011c2hhlnki2sp8gkdmbth6.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBbl8mamYgNBaXFh8GopYridNH01OxjlzU"
+          "current_key": "AIzaSyB0ZThfsLm4MLGl0ULEA9sAWqFxWvLzC88"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "484532011950-qhdgpbasuaqi8trgkpioqljbgqfh002u.apps.googleusercontent.com",
+              "client_id": "147380867452-jt628d893011c2hhlnki2sp8gkdmbth6.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

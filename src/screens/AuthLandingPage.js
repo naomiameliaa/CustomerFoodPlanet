@@ -13,7 +13,7 @@ import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import {AuthContext} from '../../context';
-import {getData, storeData, alertMessage} from '../utils';
+import {getData, storeData, alertMessage, saveFcmToken} from '../utils';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -154,6 +154,7 @@ function AuthLandingPage({navigation}) {
           isLogin: true,
         };
         storeData('guestData', dataGuest);
+        saveFcmToken();
         guestIn();
       }
     } catch (error) {
@@ -180,6 +181,7 @@ function AuthLandingPage({navigation}) {
           isLogin: true,
         };
         storeData('guestData', dataGuest);
+        saveFcmToken();
         guestIn();
       }
     } catch (error) {
@@ -231,7 +233,7 @@ function AuthLandingPage({navigation}) {
                 <View style={styles.imgWrapper}>
                   <Image
                     style={styles.imgStyle}
-                    source={require('../assets/reserved-table.png')}
+                    source={require('../assets/reserved-table.jpg')}
                     resizeMode="contain"
                   />
                 </View>
