@@ -12,7 +12,13 @@ import {
 import axios from 'axios';
 import Title from '../components/Title';
 import SpinnerKit from '../components/SpinnerKit';
-import {normalize, getData, alertMessage, storeData, removeData} from '../utils';
+import {
+  normalize,
+  getData,
+  alertMessage,
+  storeData,
+  removeData,
+} from '../utils';
 import ButtonText from '../components/ButtonText';
 import RadioButton from '../components/RadioButton';
 import theme from '../theme';
@@ -126,7 +132,6 @@ function CartPage({navigation}) {
   const [value, setValue] = React.useState(null);
   const [seatCapacity, onChangeSeatCapacity] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState('');
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
   const logout = async () => {
@@ -155,7 +160,7 @@ function CartPage({navigation}) {
       },
       btnCancel: false,
     });
-  }
+  };
 
   const getDataUser = async () => {
     const dataUser = await getData('userData');
@@ -218,8 +223,7 @@ function CartPage({navigation}) {
         setCartData(response.data.object);
       }
     } catch (error) {
-      setErrorMessage('Something went wrong');
-      if(error.response.status === 401) {
+      if (error.response.status === 401) {
         await sessionTimedOut();
       }
     }
@@ -268,9 +272,9 @@ function CartPage({navigation}) {
         });
       }
     } catch (error) {
-      if(error.response.status === 401) {
+      if (error.response.status === 401) {
         await sessionTimedOut();
-      }else {
+      } else {
         alertMessage({
           titleMessage: 'Error',
           bodyMessage: 'Failed create order, Please try again!',

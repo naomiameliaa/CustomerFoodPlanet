@@ -4,15 +4,19 @@ import {
   View,
   FlatList,
   SafeAreaView,
-  Button,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   Image,
 } from 'react-native';
 import axios from 'axios';
 import Title from '../components/Title';
-import {getData, normalize, storeData, alertMessage, removeData} from '../utils';
+import {
+  getData,
+  normalize,
+  storeData,
+  alertMessage,
+  removeData,
+} from '../utils';
 import theme from '../theme';
 import SpinnerKit from '../components/SpinnerKit';
 import ButtonKit from '../components/ButtonKit';
@@ -83,7 +87,6 @@ const styles = StyleSheet.create({
 
 function HomePage({navigation}) {
   const [listFoodCourt, setListFoodCourt] = React.useState([]);
-  const [errorMessage, setErrorMessage] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
@@ -113,8 +116,7 @@ function HomePage({navigation}) {
         setListFoodCourt(response.data.object);
       }
     } catch (error) {
-      setErrorMessage('Something went wrong');
-      if(error.response.status === 401) {
+      if (error.response.status === 401) {
         alertMessage({
           titleMessage: 'Session Timeout',
           bodyMessage: 'Please re-login',
@@ -203,6 +205,7 @@ function HomePage({navigation}) {
 
   React.useEffect(() => {
     getListFoodCourt();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

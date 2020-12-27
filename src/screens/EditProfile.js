@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {View, Text, TextInput, SafeAreaView, StyleSheet} from 'react-native';
+import {View, TextInput, SafeAreaView, StyleSheet} from 'react-native';
 import axios from 'axios';
 import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
 });
 
-function RegisterPage({navigation}) {
+function EditProfile({navigation}) {
   const [fullName, onChangeFullName] = React.useState('');
   const [email, onChangeEmail] = React.useState('');
   const [password, onChangePassword] = React.useState('');
@@ -84,7 +84,6 @@ function RegisterPage({navigation}) {
 
   async function signUp() {
     setIsLoading(true);
-    console.log('masuk signup', email, password, fullName, phoneNum);
     try {
       const response = await axios.post(
         'https://food-planet.herokuapp.com/users/register',
@@ -124,7 +123,7 @@ function RegisterPage({navigation}) {
           source={require('../assets/back-button.png')}
           onPress={() => navigation.goBack()}
         />
-        <Title txtStyle={styles.txtTitle} text="Create your account" />
+        <Title txtStyle={styles.txtTitle} text="Edit your Profile" />
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.inputStyle}
@@ -157,32 +156,16 @@ function RegisterPage({navigation}) {
             placeholder="Phone Number"
           />
           <ButtonText
-            title="Sign up"
+            title="Submit"
             txtStyle={styles.signUpTxt}
             wrapperStyle={styles.signUpWrapper}
             onPress={signUp}
             isLoading={isLoading}
           />
-          <View style={styles.TCWrapper}>
-            <Text style={styles.TCTxt}>
-              By clicking Sign up, you agree to our
-            </Text>
-            <ButtonText title="Terms and Conditions" txtStyle={styles.TCBtn} />
-          </View>
-          <View style={styles.loginWrapper}>
-            <Text style={styles.loginTxt}>Already have an account?</Text>
-            <ButtonText
-              title="Log in"
-              txtStyle={styles.loginBtn}
-              onPress={() => {
-                navigation.navigate('LoginPage');
-              }}
-            />
-          </View>
         </View>
       </View>
     </SafeAreaView>
   );
 }
 
-export default RegisterPage;
+export default EditProfile;

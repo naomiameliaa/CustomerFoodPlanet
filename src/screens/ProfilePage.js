@@ -230,13 +230,15 @@ function ProfilePage({navigation}) {
     setisLoadingLogout(false);
   }
 
-  function sessionTimedOut () {
+  function sessionTimedOut() {
     alertMessage({
       titleMessage: 'Session Timeout',
       bodyMessage: 'Please re-login',
       btnText: 'OK',
       onPressOK: () => {
-        checkUserGuest() === 'member' ? signOutMember() : signOutGuest(checkUserGuest());
+        checkUserGuest() === 'member'
+          ? signOutMember()
+          : signOutGuest(checkUserGuest());
       },
       btnCancel: false,
     });
@@ -250,13 +252,13 @@ function ProfilePage({navigation}) {
         `https://food-planet.herokuapp.com/users/profile?userId=${userId}`,
       );
       if (response.data.msg === 'Query success') {
+        console.log(response.data);
         setDataProfile(response.data.object);
       }
     } catch (error) {
-      if(error.response.data.status === 401) {
+      if (error.response.data.status === 401) {
         sessionTimedOut();
       }
-      console.log(error);
     }
     setIsLoadingLogin(false);
   }
@@ -283,6 +285,8 @@ function ProfilePage({navigation}) {
     return resPrice;
   };
 
+  console.log(dataProfile.fullname);
+
   React.useEffect(() => {
     getProfile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -301,7 +305,7 @@ function ProfilePage({navigation}) {
           ) : (
             <View style={styles.identityWrapper}>
               <Text style={styles.identityName} numberOfLines={1}>
-                {dataProfile.fullname}
+                {dataProfile.fullname ? dataProfile.fullname : 'Guest'}
               </Text>
               <Text style={styles.numEmailIdentity}>
                 {dataProfile.phoneNumber}
@@ -313,6 +317,7 @@ function ProfilePage({navigation}) {
             <ButtonKit
               btnStyle={styles.editButton}
               source={require('../assets/edit.png')}
+              onPress={() => navigation.navigate('Edit Profile')}
             />
           </View>
         </View>
@@ -339,6 +344,13 @@ function ProfilePage({navigation}) {
           </View>
         )}
         <View style={styles.btnContainer}>
+          <TouchableOpacity style={styles.btnWrapper}>
+            <Text style={styles.buttonTxt}>Change Password</Text>
+            <Image
+              style={styles.nextButton}
+              source={require('../assets/next-button.png')}
+            />
+          </TouchableOpacity>
           <TouchableOpacity style={styles.btnWrapper}>
             <Text style={styles.buttonTxt}>Payment Method</Text>
             <Image

@@ -12,6 +12,7 @@ import HomePage from './src/screens/HomePage';
 import CartPage from './src/screens/CartPage';
 import OrderPage from './src/screens/OrderPage';
 import ProfilePage from './src/screens/ProfilePage';
+import EditProfile from './src/screens/EditProfile';
 import ListTenant from './src/screens/ListTenant';
 import ListMenu from './src/screens/ListMenu';
 import theme from './src/theme';
@@ -132,6 +133,11 @@ function ProfileStackScreen() {
         name="Profile"
         options={{headerShown: false}}
         component={ProfilePage}
+      />
+      <ProfileStack.Screen
+        name="Edit Profile"
+        options={{headerShown: false}}
+        component={EditProfile}
       />
     </ProfileStack.Navigator>
   );
