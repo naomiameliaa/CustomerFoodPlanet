@@ -111,7 +111,7 @@ function LoginPage({navigation}) {
             role: 'customer',
           },
           auth: {
-            username: usernameEmail,
+            username: usernameEmail.toLowerCase(),
             password: password,
           },
         },
@@ -122,6 +122,7 @@ function LoginPage({navigation}) {
         signIn();
       }
     } catch (error) {
+      console.log(error);
       alertMessage({
         titleMessage: 'Error',
         bodyMessage: 'Incorrect password or email',

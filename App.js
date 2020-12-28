@@ -12,7 +12,10 @@ import HomePage from './src/screens/HomePage';
 import CartPage from './src/screens/CartPage';
 import OrderPage from './src/screens/OrderPage';
 import ProfilePage from './src/screens/ProfilePage';
+import RegisterMember from './src/screens/RegisterMember';
 import EditProfile from './src/screens/EditProfile';
+import ChangeEmail from './src/screens/ChangeEmail';
+import ChangePassword from './src/screens/ChangePassword';
 import ListTenant from './src/screens/ListTenant';
 import ListMenu from './src/screens/ListMenu';
 import theme from './src/theme';
@@ -135,26 +138,28 @@ function ProfileStackScreen() {
         component={ProfilePage}
       />
       <ProfileStack.Screen
+        name="Register Member"
+        options={{headerShown: false}}
+        component={RegisterMember}
+      />
+      <ProfileStack.Screen
         name="Edit Profile"
         options={{headerShown: false}}
         component={EditProfile}
       />
+      <ProfileStack.Screen
+        name="Change Email"
+        options={{headerShown: false}}
+        component={ChangeEmail}
+      />
+      <ProfileStack.Screen
+        name="Change Password"
+        options={{headerShown: false}}
+        component={ChangePassword}
+      />
     </ProfileStack.Navigator>
   );
 }
-
-// const ListTenantStack = createStackNavigator();
-// function ListTenantScreen() {
-//   return (
-//     <ListTenantStack.Navigator>
-//       <ListTenantStack.Screen
-//         name="List Tenant"
-//         options={{headerShown: false}}
-//         component={ListTenant}
-//       />
-//     </ListTenantStack.Navigator>
-//   );
-// }
 
 const Tab = createBottomTabNavigator();
 function TabScreen() {

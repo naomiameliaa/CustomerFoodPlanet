@@ -1,26 +1,50 @@
 import * as React from 'react';
-import {View, Text, TextInput, SafeAreaView, StyleSheet} from 'react-native';
+import {
+  View,
+  TextInput,
+  Text,
+  SafeAreaView,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
 import axios from 'axios';
 import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {alertMessage} from '../utils';
+import {
+  normalize,
+  getData,
+  removeData,
+  storeData,
+  alertMessage,
+} from '../utils';
+import {AuthContext} from '../../context';
+
+const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.light_grey,
     flex: 1,
   },
   innerContainer: {
-    padding: 20,
+    padding: normalize(20),
   },
   backButton: {
-    marginVertical: 20,
+    marginHorizontal: 10,
+    marginVertical: 25,
   },
   txtTitle: {
-    margin: 20,
+    marginHorizontal: 20,
+    marginBottom: 10,
     color: theme.colors.red,
+  },
+  content: {
+    width: SCREEN_WIDTH * 0.8,
+    fontSize: 16,
+    color: theme.colors.grey,
+    marginHorizontal: 20,
+    marginBottom: 30,
   },
   inputContainer: {
     alignItems: 'center',
@@ -46,70 +70,113 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginVertical: 10,
   },
-  loginTxt: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginHorizontal: 5,
-  },
-  loginBtn: {
-    color: theme.colors.red,
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  loginWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
-    marginVertical: 20,
-  },
-  TCTxt: {
-    fontSize: 15,
-    marginHorizontal: 5,
-  },
-  TCBtn: {
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  TCWrapper: {
-    marginBottom: 100,
-  },
 });
 
-function RegisterPage({navigation}) {
+function RegisterMember({navigation}) {
+  const [isLoading, setIsLoading] = React.useState(false);
   const [fullName, onChangeFullName] = React.useState('');
   const [email, onChangeEmail] = React.useState('');
   const [password, onChangePassword] = React.useState('');
   const [phoneNum, onChangePhoneNum] = React.useState('');
-  const [isLoading, setIsLoading] = React.useState(false);
+  const {signOutGuest, signOut} = React.useContext(AuthContext);
 
-  async function signUp() {
+  const getDataUser = async () => {
+    const dataUser = await getData('userData');
+    if (dataUser !== null) {
+      return dataUser;
+    } else {
+      return null;
+    }
+  };
+
+  const getDataGuest = async () => {
+    const dataGuest = await getData('guestData');
+    if (dataGuest !== null) {
+      return dataGuest;
+    } else {
+      return null;
+    }
+  };
+
+  const getUserGuestData = async () => {
+    const dataUser = await getDataUser();
+    const dataGuest = await getDataGuest();
+    if (dataUser !== null) {
+      return dataUser.userId;
+    } else {
+      return dataGuest.userId;
+    }
+  };
+
+  const updateData = async () => {
+    await removeData('guestData');
+    await signOutGuest(null);
+  };
+
+  const logout = async () => {
+    const dataUser = await getData('userData');
+    const dataGuest = await getData('guestData');
+    if (dataUser !== null) {
+      await removeData('userData');
+      await signOut();
+    } else {
+      const dataGuestUpdated = {
+        ...dataGuest,
+        isLogin: false,
+      };
+      await storeData('guestData', dataGuestUpdated);
+      await signOutGuest(dataGuestUpdated);
+    }
+  };
+
+  function sessionTimedOut() {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
+
+  async function registerAsMember() {
     setIsLoading(true);
     try {
+      const userId = await getUserGuestData();
       const response = await axios.post(
-        'https://food-planet.herokuapp.com/users/register',
+        'https://food-planet.herokuapp.com/users/registerMember',
         {
+          userId: userId,
           email: email.toLowerCase(),
           password: password,
           fullName: fullName,
           phoneNumber: phoneNum,
         },
       );
-      if (response.data.msg === 'Register success') {
+      if (response.data.msg === 'Register member success') {
+        console.log(response.data);
         alertMessage({
           titleMessage: 'Register Succeed',
           bodyMessage:
             'Thank you for register! Please kindly check your email for activation your email',
           btnText: 'OK',
-          onPressOK: () => navigation.navigate('AuthLandingPage'),
+          onPressOK: () => updateData(),
           btnCancel: false,
         });
       }
     } catch (error) {
-      alertMessage({
-        titleMessage: 'Error',
-        bodyMessage: 'Failed to Register Account, Please try again!',
-        btnText: 'Try Again',
-        btnCancel: false,
-      });
+      if (error.response.status === 401) {
+        sessionTimedOut();
+      } else {
+        alertMessage({
+          titleMessage: 'Error',
+          bodyMessage: 'Failed to Register as Member, Please try again!',
+          btnText: 'Try Again',
+          btnCancel: false,
+        });
+      }
     }
     setIsLoading(false);
   }
@@ -122,7 +189,10 @@ function RegisterPage({navigation}) {
           source={require('../assets/back-button.png')}
           onPress={() => navigation.goBack()}
         />
-        <Title txtStyle={styles.txtTitle} text="Create your account" />
+        <Title text="Register as Member" txtStyle={styles.txtTitle} />
+        <Text style={styles.content}>
+          Please enter your email to register as member.
+        </Text>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.inputStyle}
@@ -158,29 +228,13 @@ function RegisterPage({navigation}) {
             title="Sign up"
             txtStyle={styles.signUpTxt}
             wrapperStyle={styles.signUpWrapper}
-            onPress={signUp}
+            onPress={registerAsMember}
             isLoading={isLoading}
           />
-          <View style={styles.TCWrapper}>
-            <Text style={styles.TCTxt}>
-              By clicking Sign up, you agree to our
-            </Text>
-            <ButtonText title="Terms and Conditions" txtStyle={styles.TCBtn} />
-          </View>
-          <View style={styles.loginWrapper}>
-            <Text style={styles.loginTxt}>Already have an account?</Text>
-            <ButtonText
-              title="Log in"
-              txtStyle={styles.loginBtn}
-              onPress={() => {
-                navigation.navigate('LoginPage');
-              }}
-            />
-          </View>
         </View>
       </View>
     </SafeAreaView>
   );
 }
 
-export default RegisterPage;
+export default RegisterMember;

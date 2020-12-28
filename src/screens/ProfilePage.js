@@ -59,6 +59,11 @@ const styles = StyleSheet.create({
     width: '80%',
     height: '80%',
   },
+  editButtonDisabled: {
+    width: '80%',
+    height: '80%',
+    opacity: 0.3,
+  },
   editBtnWrapper: {
     marginVertical: 20,
   },
@@ -252,7 +257,6 @@ function ProfilePage({navigation}) {
         `https://food-planet.herokuapp.com/users/profile?userId=${userId}`,
       );
       if (response.data.msg === 'Query success') {
-        console.log(response.data);
         setDataProfile(response.data.object);
       }
     } catch (error) {
@@ -285,8 +289,6 @@ function ProfilePage({navigation}) {
     return resPrice;
   };
 
-  console.log(dataProfile.fullname);
-
   React.useEffect(() => {
     getProfile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -310,14 +312,26 @@ function ProfilePage({navigation}) {
               <Text style={styles.numEmailIdentity}>
                 {dataProfile.phoneNumber}
               </Text>
-              <Text style={styles.numEmailIdentity}>{dataUserGuest.email}</Text>
+              <Text style={styles.numEmailIdentity} numberOfLines={1}>
+                {dataUserGuest.email}
+              </Text>
             </View>
           )}
           <View style={styles.editBtnWrapper}>
             <ButtonKit
-              btnStyle={styles.editButton}
+              btnStyle={
+                dataUserGuest.isGuest
+                  ? styles.editButtonDisabled
+                  : styles.editButton
+              }
               source={require('../assets/edit.png')}
-              onPress={() => navigation.navigate('Edit Profile')}
+              onPress={() =>
+                navigation.navigate('Edit Profile', {
+                  full_name: dataProfile.fullname,
+                  phone_num: dataProfile.phoneNumber,
+                })
+              }
+              disabled={dataUserGuest.isGuest ? true : false}
             />
           </View>
         </View>
@@ -344,13 +358,39 @@ function ProfilePage({navigation}) {
           </View>
         )}
         <View style={styles.btnContainer}>
-          <TouchableOpacity style={styles.btnWrapper}>
-            <Text style={styles.buttonTxt}>Change Password</Text>
-            <Image
-              style={styles.nextButton}
-              source={require('../assets/next-button.png')}
-            />
-          </TouchableOpacity>
+          {dataUserGuest.isGuest && (
+            <TouchableOpacity
+              style={styles.btnWrapper}
+              onPress={() => navigation.navigate('Register Member')}>
+              <Text style={styles.buttonTxt}>Register as Member</Text>
+              <Image
+                style={styles.nextButton}
+                source={require('../assets/next-button.png')}
+              />
+            </TouchableOpacity>
+          )}
+          {!dataUserGuest.isGuest && (
+            <TouchableOpacity
+              style={styles.btnWrapper}
+              onPress={() => navigation.navigate('Change Email')}>
+              <Text style={styles.buttonTxt}>Change Email</Text>
+              <Image
+                style={styles.nextButton}
+                source={require('../assets/next-button.png')}
+              />
+            </TouchableOpacity>
+          )}
+          {!dataUserGuest.isGuest && (
+            <TouchableOpacity
+              style={styles.btnWrapper}
+              onPress={() => navigation.navigate('Change Password')}>
+              <Text style={styles.buttonTxt}>Change Password</Text>
+              <Image
+                style={styles.nextButton}
+                source={require('../assets/next-button.png')}
+              />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity style={styles.btnWrapper}>
             <Text style={styles.buttonTxt}>Payment Method</Text>
             <Image
