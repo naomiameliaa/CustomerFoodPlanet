@@ -1,21 +1,12 @@
 import * as React from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  SafeAreaView,
-  StyleSheet,
-  Dimensions,
-} from 'react-native';
+import {View, Text, TextInput, SafeAreaView, StyleSheet} from 'react-native';
 import axios from 'axios';
 import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import {AuthContext} from '../../context';
-import {storeData, alertMessage, getUserId, saveFcmToken} from '../utils';
-
-const {width: SCREEN_WIDTH} = Dimensions.get('window');
+import {storeData, alertMessage, saveFcmToken} from '../utils';
 
 const styles = StyleSheet.create({
   container: {
