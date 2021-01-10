@@ -4,6 +4,7 @@ export default {
     red_20: 'rgba(200,65,39,0.2)',
     off_white: '#FEFEFE',
     white: '#FFFFFF',
+    white_20: 'rgba(255,255,255,0.2)',
     white_background: '#F8F8F8',
     black: '#000000',
     light_grey: '#F2F2F2',

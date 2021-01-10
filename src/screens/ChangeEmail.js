@@ -1,8 +1,8 @@
 import * as React from 'react';
 import {
   View,
-  Text,
   TextInput,
+  Text,
   SafeAreaView,
   StyleSheet,
   Dimensions,
@@ -12,26 +12,39 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {alertMessage, getData, removeData, storeData} from '../utils';
+import {
+  normalize,
+  getData,
+  removeData,
+  storeData,
+  alertMessage,
+} from '../utils';
 import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.light_grey,
     flex: 1,
   },
   innerContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    padding: normalize(20),
   },
   backButton: {
-    marginVertical: 20,
+    marginHorizontal: 10,
+    marginVertical: 25,
   },
   txtTitle: {
-    margin: 20,
+    marginHorizontal: 20,
+    marginBottom: 10,
     color: theme.colors.red,
+  },
+  content: {
+    width: SCREEN_WIDTH * 0.8,
+    fontSize: 16,
+    color: theme.colors.grey,
+    marginHorizontal: 20,
+    marginBottom: 30,
   },
   inputContainer: {
     alignItems: 'center',
@@ -46,45 +59,51 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     justifyContent: 'center',
   },
-  content: {
-    width: SCREEN_WIDTH * 0.8,
-    fontSize: 16,
-    color: theme.colors.grey,
-    marginHorizontal: 20,
-    marginBottom: 20,
-  },
-  sendTxt: {
+  btnTxt: {
     color: theme.colors.white,
     fontSize: 18,
   },
-  sendWrapper: {
+  btnWrapper: {
     backgroundColor: theme.colors.red,
     width: '90%',
     borderRadius: 20,
     paddingVertical: 12,
     marginVertical: 10,
   },
-  signUpTxt: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginHorizontal: 5,
-  },
-  signUpBtn: {
-    color: theme.colors.red,
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  signUpWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
-    marginVertical: 20,
-  },
 });
 
-function ForgotPassword({navigation}) {
-  const [email, onChangeEmail] = React.useState('');
+function ChangeEmail({navigation}) {
   const [isLoading, setIsLoading] = React.useState(false);
+  const [email, onChangeEmail] = React.useState('');
   const {signOutGuest, signOut} = React.useContext(AuthContext);
+
+  const getDataUser = async () => {
+    const dataUser = await getData('userData');
+    if (dataUser !== null) {
+      return dataUser;
+    } else {
+      return null;
+    }
+  };
+
+  const getDataGuest = async () => {
+    const dataGuest = await getData('guestData');
+    if (dataGuest !== null) {
+      return dataGuest;
+    } else {
+      return null;
+    }
+  };
+
+  const getUserGuestData = async () => {
+    const dataUser = await getDataUser();
+    const dataGuest = await getDataGuest();
+    if (dataUser !== null) {
+      return dataUser.userId;
+    } else {
+      return dataGuest.userId;
+    }
+  };
 
   const logout = async () => {
     const dataUser = await getData('userData');
@@ -114,18 +133,20 @@ function ForgotPassword({navigation}) {
     });
   }
 
-  async function sendEmail() {
+  async function changeEmail() {
     setIsLoading(true);
     try {
+      const userId = await getUserGuestData();
       const response = await axios.post(
-        `https://food-planet.herokuapp.com/users/forgotPassword?email=${email}`,
+        `https://food-planet.herokuapp.com/users/changeEmail?userId=${userId}&email=${email.toLowerCase()}`,
       );
-      if (response.data.msg === 'Forgot password success') {
+      if (response.data.msg === 'Change email success') {
         alertMessage({
-          titleMessage: 'Success',
-          bodyMessage: 'Please kindly check your email',
+          titleMessage: 'Change Email Succeed',
+          bodyMessage: 'Email changed successfully, Please re-login!',
           btnText: 'OK',
-          btnCancel: true,
+          onPressOK: () => logout(),
+          btnCancel: false,
         });
       }
     } catch (error) {
@@ -133,26 +154,14 @@ function ForgotPassword({navigation}) {
         sessionTimedOut();
       } else {
         alertMessage({
-          titleMessage: 'Failed',
-          bodyMessage: 'Please try again later',
+          titleMessage: 'Error',
+          bodyMessage: 'Failed to Register as Member, Please try again!',
           btnText: 'Try Again',
-          btnCancel: true,
+          btnCancel: false,
         });
       }
     }
     setIsLoading(false);
-  }
-
-  function validationEmail() {
-    if (email === '') {
-      alertMessage({
-        titleMessage: 'Error',
-        bodyMessage: 'Email field is required',
-        btnText: 'OK',
-        btnCancel: true,
-      });
-    }
-    sendEmail();
   }
 
   return (
@@ -163,11 +172,8 @@ function ForgotPassword({navigation}) {
           source={require('../assets/back-button.png')}
           onPress={() => navigation.goBack()}
         />
-        <Title txtStyle={styles.txtTitle} text="Forgot Password" />
-        <Text style={styles.content}>
-          Please enter your email to receive a link to create a new password via
-          email.
-        </Text>
+        <Title text="Change Email" txtStyle={styles.txtTitle} />
+        <Text style={styles.content}>Please enter your new email.</Text>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.inputStyle}
@@ -177,10 +183,10 @@ function ForgotPassword({navigation}) {
             placeholder="Email"
           />
           <ButtonText
-            title="Send"
-            txtStyle={styles.sendTxt}
-            wrapperStyle={styles.sendWrapper}
-            onPress={() => validationEmail()}
+            title="Submit"
+            txtStyle={styles.btnTxt}
+            wrapperStyle={styles.btnWrapper}
+            onPress={changeEmail}
             isLoading={isLoading}
           />
         </View>
@@ -189,4 +195,4 @@ function ForgotPassword({navigation}) {
   );
 }
 
-export default ForgotPassword;
+export default ChangeEmail;

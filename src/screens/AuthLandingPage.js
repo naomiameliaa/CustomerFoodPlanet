@@ -65,22 +65,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontSize: 16,
   },
-  paginationWrapper: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 280,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  paginationDots: {
-    height: 10,
-    width: 10,
-    borderRadius: 10,
-    backgroundColor: theme.colors.red,
-    marginLeft: 10,
-  },
   slider: {
     alignSelf: 'center',
     justifyContent: 'center',
@@ -90,7 +74,7 @@ const styles = StyleSheet.create({
   dotContainer: {
     backgroundColor: 'transparent',
     position: 'absolute',
-    bottom: 0,
+    bottom: 20,
   },
   buttonContainer: {
     alignItems: 'center',

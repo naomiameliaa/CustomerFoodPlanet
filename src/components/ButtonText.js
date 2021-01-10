@@ -14,11 +14,19 @@ const styles = StyleSheet.create({
   },
 });
 
-function ButtonText({title, onPress, txtStyle, wrapperStyle, isLoading}) {
+function ButtonText({
+  title,
+  onPress,
+  txtStyle,
+  wrapperStyle,
+  isLoading,
+  disabled,
+}) {
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={[styles.btnWrapper, wrapperStyle]}>
+      style={[styles.btnWrapper, wrapperStyle]}
+      disabled={disabled ? true : false}>
       {isLoading ? (
         <SpinnerKit colorSpinner={theme.colors.white} />
       ) : (

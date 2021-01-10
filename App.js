@@ -12,7 +12,10 @@ import HomePage from './src/screens/HomePage';
 import CartPage from './src/screens/CartPage';
 import OrderPage from './src/screens/OrderPage';
 import ProfilePage from './src/screens/ProfilePage';
+import RegisterMember from './src/screens/RegisterMember';
 import EditProfile from './src/screens/EditProfile';
+import ChangeEmail from './src/screens/ChangeEmail';
+import ChangePassword from './src/screens/ChangePassword';
 import ListTenant from './src/screens/ListTenant';
 import ListMenu from './src/screens/ListMenu';
 import theme from './src/theme';
@@ -22,6 +25,7 @@ import DetailMenuPage from './src/screens/DetailMenu';
 import DetailFoodcourtPage from './src/screens/DetailFoodcourt';
 import OrderDetailPage from './src/screens/OrderDetailPage';
 import QRCodeScanner from './src/screens/QRCodeScanner';
+import RatingOrder from './src/screens/RatingOrder';
 import messaging from '@react-native-firebase/messaging';
 
 const styles = StyleSheet.create({
@@ -110,6 +114,7 @@ function OrderStackScreen() {
         component={OrderDetailPage}
       />
       <OrderStack.Screen name="QR Code Scanner" component={QRCodeScanner} />
+      <OrderStack.Screen name="Rating Order" component={RatingOrder} />
     </OrderStack.Navigator>
   );
 }
@@ -135,26 +140,28 @@ function ProfileStackScreen() {
         component={ProfilePage}
       />
       <ProfileStack.Screen
+        name="Register Member"
+        options={{headerShown: false}}
+        component={RegisterMember}
+      />
+      <ProfileStack.Screen
         name="Edit Profile"
         options={{headerShown: false}}
         component={EditProfile}
       />
+      <ProfileStack.Screen
+        name="Change Email"
+        options={{headerShown: false}}
+        component={ChangeEmail}
+      />
+      <ProfileStack.Screen
+        name="Change Password"
+        options={{headerShown: false}}
+        component={ChangePassword}
+      />
     </ProfileStack.Navigator>
   );
 }
-
-// const ListTenantStack = createStackNavigator();
-// function ListTenantScreen() {
-//   return (
-//     <ListTenantStack.Navigator>
-//       <ListTenantStack.Screen
-//         name="List Tenant"
-//         options={{headerShown: false}}
-//         component={ListTenant}
-//       />
-//     </ListTenantStack.Navigator>
-//   );
-// }
 
 const Tab = createBottomTabNavigator();
 function TabScreen() {
@@ -295,15 +302,14 @@ export default function App() {
 
   React.useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+      Alert.alert(
+        'Please pick-up your food',
+        JSON.stringify(remoteMessage.notification.body),
+      );
     });
 
     return unsubscribe;
   }, []);
-
-  // if (isLoading) {
-  //   return <Splash />;
-  // }
 
   return (
     <AuthContext.Provider value={authContext}>

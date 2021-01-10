@@ -5,7 +5,8 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {alertMessage} from '../utils';
+import {getData, removeData, storeData, alertMessage} from '../utils';
+import {AuthContext} from '../../context';
 
 const styles = StyleSheet.create({
   container: {
@@ -75,42 +76,104 @@ const styles = StyleSheet.create({
   },
 });
 
-function EditProfile({navigation}) {
-  const [fullName, onChangeFullName] = React.useState('');
-  const [email, onChangeEmail] = React.useState('');
-  const [password, onChangePassword] = React.useState('');
-  const [phoneNum, onChangePhoneNum] = React.useState('');
+function EditProfile({navigation, route}) {
+  const {full_name, phone_num, getProfile} = route.params;
+  const [fullName, onChangeFullName] = React.useState(full_name);
+  const [phoneNum, onChangePhoneNum] = React.useState(phone_num);
   const [isLoading, setIsLoading] = React.useState(false);
+  const {signOutGuest, signOut} = React.useContext(AuthContext);
 
-  async function signUp() {
+  const getDataUser = async () => {
+    const dataUser = await getData('userData');
+    if (dataUser !== null) {
+      return dataUser;
+    } else {
+      return null;
+    }
+  };
+
+  const getDataGuest = async () => {
+    const dataGuest = await getData('guestData');
+    if (dataGuest !== null) {
+      return dataGuest;
+    } else {
+      return null;
+    }
+  };
+
+  const getUserGuestData = async () => {
+    const dataUser = await getDataUser();
+    const dataGuest = await getDataGuest();
+    if (dataUser !== null) {
+      return dataUser.userId;
+    } else {
+      return dataGuest.userId;
+    }
+  };
+
+  const logout = async () => {
+    const dataUser = await getData('userData');
+    const dataGuest = await getData('guestData');
+    if (dataUser !== null) {
+      await removeData('userData');
+      await signOut();
+    } else {
+      const dataGuestUpdated = {
+        ...dataGuest,
+        isLogin: false,
+      };
+      await storeData('guestData', dataGuestUpdated);
+      await signOutGuest(dataGuestUpdated);
+    }
+  };
+
+  function sessionTimedOut() {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
+
+  async function editProfile() {
     setIsLoading(true);
+    const userId = await getUserGuestData();
     try {
-      const response = await axios.post(
-        'https://food-planet.herokuapp.com/users/register',
+      const response = await axios.put(
+        'https://food-planet.herokuapp.com/users/updateProfile',
         {
-          email: email,
-          password: password,
-          fullName: fullName,
+          userId: userId,
           phoneNumber: phoneNum,
+          fullname: fullName,
         },
       );
-      if (response.data.msg === 'Register success') {
+      if (response.data.msg === 'Update profile success') {
         alertMessage({
-          titleMessage: 'Register Succeed',
-          bodyMessage:
-            'Thank you for register! Please kindly check your email for activation your email',
+          titleMessage: 'Update profile Succeed',
+          bodyMessage: 'Profile changed successfully',
           btnText: 'OK',
-          onPressOK: () => navigation.navigate('AuthLandingPage'),
+          onPressOK: () => {
+            navigation.goBack();
+            getProfile();
+          },
           btnCancel: false,
         });
       }
     } catch (error) {
-      alertMessage({
-        titleMessage: 'Error',
-        bodyMessage: 'Failed to Register Account, Please try again!',
-        btnText: 'Try Again',
-        btnCancel: false,
-      });
+      if (error.response.status === 401) {
+        sessionTimedOut();
+      } else {
+        alertMessage({
+          titleMessage: 'Error',
+          bodyMessage: 'Failed to update your profile, Please try again!',
+          btnText: 'Try Again',
+          btnCancel: false,
+        });
+      }
     }
     setIsLoading(false);
   }
@@ -134,21 +197,6 @@ function EditProfile({navigation}) {
           />
           <TextInput
             style={styles.inputStyle}
-            onChangeText={(text) => onChangeEmail(text)}
-            value={email}
-            textContentType="emailAddress"
-            placeholder="Email"
-          />
-          <TextInput
-            style={styles.inputStyle}
-            onChangeText={(text) => onChangePassword(text)}
-            value={password}
-            textContentType="password"
-            placeholder="Password"
-            secureTextEntry={true}
-          />
-          <TextInput
-            style={styles.inputStyle}
             onChangeText={(text) => onChangePhoneNum(text)}
             value={phoneNum}
             textContentType="telephoneNumber"
@@ -159,7 +207,7 @@ function EditProfile({navigation}) {
             title="Submit"
             txtStyle={styles.signUpTxt}
             wrapperStyle={styles.signUpWrapper}
-            onPress={signUp}
+            onPress={editProfile}
             isLoading={isLoading}
           />
         </View>
