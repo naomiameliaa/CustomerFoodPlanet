@@ -262,9 +262,8 @@ function HomePage({navigation}) {
         const closeMinute = parseInt(closeHourMinute[1], 10);
 
         if (
-          ((hour === openHour && minute >= openMinute) || hour > openHour)(
-            (hour === closeHour && minute < closeMinute) || hour < closeHour,
-          )
+          ((hour === openHour && minute >= openMinute) || hour > openHour) &&
+          ((hour === closeHour && minute < closeMinute) || hour < closeHour)
         ) {
           statusOpen = true;
         }
