@@ -252,18 +252,20 @@ function HomePage({navigation}) {
 
     item.openingHourList.forEach(checkOpen);
 
-    function checkOpen(item) {
-      if(day === parseInt(item.day, 10)) {
-        const openHourMinute = item.openHour.split(':');
-        const closeHourMinute = item.closeHour.split(':');
+    function checkOpen(itm) {
+      if (day === parseInt(itm.day, 10)) {
+        const openHourMinute = itm.openHour.split(':');
+        const closeHourMinute = itm.closeHour.split(':');
         const openHour = parseInt(openHourMinute[0], 10);
         const openMinute = parseInt(openHourMinute[1], 10);
         const closeHour = parseInt(closeHourMinute[0], 10);
         const closeMinute = parseInt(closeHourMinute[1], 10);
 
-        if( ((hour === openHour && minute >= openMinute) || (hour > openHour))
-          && ((hour === closeHour && minute < closeMinute) || (hour < closeHour))
-        ){
+        if (
+          ((hour === openHour && minute >= openMinute) || hour > openHour)(
+            (hour === closeHour && minute < closeMinute) || hour < closeHour,
+          )
+        ) {
           statusOpen = true;
         }
       }
@@ -294,9 +296,9 @@ function HomePage({navigation}) {
               )}
 
               <Text style={styles.hourStyle}>
-                {item.openingHourList[day-1].openHour}
+                {item.openingHourList[day - 1].openHour}
                 {'-'}
-                {item.openingHourList[day-1].closeHour}
+                {item.openingHourList[day - 1].closeHour}
               </Text>
             </View>
           </View>
