@@ -205,7 +205,10 @@ android {
                 output.versionCodeOverride =
                         versionCodes.get(abi) * 1048576 + defaultConfig.versionCode
             }
-
+            def date = new Date()
+            def formattedDate = date.format('yyyyMMddHHmmss')
+            def apkName = "FoodPlanet_" + variant.name + '_' + formattedDate + '.apk'
+            output.outputFileName = apkName;
         }
     }
 }
