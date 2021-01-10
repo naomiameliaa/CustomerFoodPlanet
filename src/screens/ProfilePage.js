@@ -151,6 +151,7 @@ function ProfilePage({navigation}) {
   const [dataUserGuest, setDataUserGuest] = React.useState([]);
   const [isLoadingLogin, setIsLoadingLogin] = React.useState(false);
   const [isLoadingLogout, setisLoadingLogout] = React.useState(false);
+  const [isLoadingQuery, setIsLoadingQuery] = React.useState(false);
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
   const getDataUser = async () => {
@@ -187,17 +188,34 @@ function ProfilePage({navigation}) {
     }
   };
 
-  const getUserGuestData = async () => {
+  const getUserId = async () => {
     const dataUser = await getDataUser();
     const dataGuest = await getDataGuest();
     if (dataUser !== null) {
-      setDataUserGuest(dataUser);
       return dataUser.userId;
     } else {
-      setDataUserGuest(dataGuest);
       return dataGuest.userId;
     }
   };
+
+  async function getUserGuestData() {
+    setIsLoadingQuery(true);
+    const userId = await getUserId();
+    try {
+      const response = await axios.get(
+        `https://food-planet.herokuapp.com/users/searchById?userId=${userId}`,
+      );
+      if (response.data.msg === 'Query success') {
+        storeData('userData', response.data.object);
+        setDataUserGuest(response.data.object);
+      }
+    } catch (error) {
+      if (error.response.data.status === 401) {
+        sessionTimedOut();
+      }
+    }
+    setIsLoadingQuery(false);
+  }
 
   const signOutMember = async () => {
     const removeLocalData = await removeData('userData');
@@ -251,7 +269,7 @@ function ProfilePage({navigation}) {
 
   async function getProfile() {
     setIsLoadingLogin(true);
-    const userId = await getUserGuestData();
+    const userId = await getUserId();
     try {
       const response = await axios.get(
         `https://food-planet.herokuapp.com/users/profile?userId=${userId}`,
@@ -268,6 +286,7 @@ function ProfilePage({navigation}) {
   }
 
   const renderPrice = (price) => {
+    if(price === undefined || price === null) return;
     let i;
     let tempPrice = '';
     let ctr = 0;
@@ -290,9 +309,13 @@ function ProfilePage({navigation}) {
   };
 
   React.useEffect(() => {
-    getProfile();
+    const unsubscribe = navigation.addListener('focus', () => {
+      getProfile();
+      getUserGuestData();
+    });
+    return unsubscribe;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -336,27 +359,33 @@ function ProfilePage({navigation}) {
             />
           </View>
         </View>
-        {dataUserGuest?.balance && dataUserGuest?.point && (
-          <View style={styles.walletPointContainer}>
-            <View style={styles.walletWrapper}>
-              <Image
-                style={styles.walletStyle}
-                source={require('../assets/wallet.png')}
-              />
-              <View style={styles.txtWalletWrapper}>
-                <Text style={styles.txtWallet}>Rp</Text>
-                <Text style={styles.nominalWallet}>
-                  {renderPrice(dataUserGuest.balance)}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.pointWrapper}>
-              <Text style={styles.nominalPoint}>
-                {renderPrice(dataUserGuest.point)}
-              </Text>
-              <Text style={styles.txtPoint}>points</Text>
-            </View>
-          </View>
+        {(dataUserGuest?.balance !== null && dataUserGuest?.point !== null) && (
+            <>
+              {isLoadingQuery ? (
+                <SpinnerKit sizeSpinner="large" />
+              ) : (
+                <View style={styles.walletPointContainer}>
+                  <View style={styles.walletWrapper}>
+                    <Image
+                      style={styles.walletStyle}
+                      source={require('../assets/wallet.png')}
+                    />
+                    <View style={styles.txtWalletWrapper}>
+                      <Text style={styles.txtWallet}>Rp</Text>
+                      <Text style={styles.nominalWallet}>
+                        {renderPrice(dataUserGuest.balance)}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.pointWrapper}>
+                    <Text style={styles.nominalPoint}>
+                      {renderPrice(dataUserGuest.point)}
+                    </Text>
+                    <Text style={styles.txtPoint}>points</Text>
+                  </View>
+                </View>
+              )}
+            </>
         )}
         <View style={styles.btnContainer}>
           {dataUserGuest.isGuest && (
