@@ -244,27 +244,30 @@ function HomePage({navigation}) {
 
   const renderItem = ({item, index}) => {
     const time = new Date();
-    const day = time.getDay();
+    const day = time.getDay() === 0 ? 7 : time.getDay();
     const hour = time.getHours();
     const minute = time.getMinutes();
 
-    const convertHourMinute = (dataHour, status) => {
-      const splitDataHour = dataHour.split(':');
-      if (status === 'hour') {
-        return parseInt(splitDataHour[0], 10);
-      } else if (status === 'minute') {
-        return parseInt(splitDataHour[1], 10);
-      }
-    };
-    const result = item.openingHourList.filter(
-      (itm) =>
-        parseInt(itm.day, 10) === day &&
-        (hour === convertHourMinute(itm.openHour, 'hour') ||
-          hour >= convertHourMinute(itm.openHour, 'hour')) &&
-        (hour === convertHourMinute(itm.closeHour, 'hour') ||
-          hour < convertHourMinute(itm.closeHour, 'hour')),
-    );
+    let statusOpen = false;
 
+    item.openingHourList.forEach(checkOpen);
+
+    function checkOpen(item) {
+      if(day === parseInt(item.day, 10)) {
+        const openHourMinute = item.openHour.split(':');
+        const closeHourMinute = item.closeHour.split(':');
+        const openHour = parseInt(openHourMinute[0], 10);
+        const openMinute = parseInt(openHourMinute[1], 10);
+        const closeHour = parseInt(closeHourMinute[0], 10);
+        const closeMinute = parseInt(closeHourMinute[1], 10);
+
+        if( ((hour === openHour && minute >= openMinute) || (hour > openHour))
+          && ((hour === closeHour && minute < closeMinute) || (hour < closeHour))
+        ){
+          statusOpen = true;
+        }
+      }
+    }
     return (
       <TouchableOpacity
         style={styles.boxContainer}
@@ -274,7 +277,7 @@ function HomePage({navigation}) {
             foodcourtName: item.name,
           });
         }}
-        disabled={result.length > 0 ? false : true}>
+        disabled={!statusOpen}>
         <Image
           style={styles.imgStyle}
           source={{uri: `data:image/jpeg;base64,${item.image}`}}
@@ -284,16 +287,16 @@ function HomePage({navigation}) {
           <View style={styles.detailContainer}>
             <Text style={styles.titleFoodCourt}>{item.name}</Text>
             <View style={styles.hourWrapper}>
-              {result.length > 0 ? (
+              {statusOpen ? (
                 <Text style={styles.openTxt}>Open Now</Text>
               ) : (
                 <Text style={styles.closeTxt}>Closed</Text>
               )}
 
               <Text style={styles.hourStyle}>
-                {item.openingHourList[0].openHour}
+                {item.openingHourList[day-1].openHour}
                 {'-'}
-                {item.openingHourList[0].closeHour}
+                {item.openingHourList[day-1].closeHour}
               </Text>
             </View>
           </View>
@@ -309,7 +312,7 @@ function HomePage({navigation}) {
                 foodcourtHourList: item.openingHourList,
               })
             }
-            disabled={result.length > 0 ? false : true}
+            disabled={!statusOpen}
           />
         </View>
         <ButtonText
@@ -317,16 +320,19 @@ function HomePage({navigation}) {
           txtStyle={styles.buttonTxtStyle}
           wrapperStyle={styles.btnWrapperStyle}
           onPress={() => checkAvailableSeat(item.foodcourtId)}
-          disabled={result.length > 0 ? false : true}
+          disabled={!statusOpen}
         />
       </TouchableOpacity>
     );
   };
 
   React.useEffect(() => {
-    getListFoodCourt();
+    const unsubscribe = navigation.addListener('focus', () => {
+      getListFoodCourt();
+    });
+    return unsubscribe;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
