@@ -14,7 +14,13 @@ import {
 import axios from 'axios';
 import ButtonKit from '../components/ButtonKit';
 import theme from '../theme';
-import {normalize, alertMessage, getData, storeData, removeData} from '../utils';
+import {
+  normalize,
+  alertMessage,
+  getData,
+  storeData,
+  removeData,
+} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
 import {AuthContext} from '../../context';
 
@@ -73,6 +79,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 30,
   },
+  notFoundWrapper: {
+    height: 0.38 * SCREEN_HEIGHT,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoNotFound: {
+    width: 100,
+    height: 100,
+  },
+  notFound: {
+    color: theme.colors.red,
+    fontSize: normalize(18),
+    fontWeight: 'bold',
+    marginTop: 20,
+  },
   categoryTenant: {
     fontSize: normalize(16),
   },
@@ -119,7 +140,8 @@ function ListMenu({route, navigation}) {
   const [searchWord, onChangeSearchWord] = React.useState('');
   const {tenantId, tenantName, tenantImg, tenantCategory} = route.params;
   const [listMenu, setListMenu] = React.useState([]);
-  const [errorMessage, setErrorMessage] = React.useState('');
+  const [listMenuSearch, setListMenuSearch] = React.useState([]);
+  const [isSearchResultEmpty, setSearchResultEmpty] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
@@ -139,7 +161,7 @@ function ListMenu({route, navigation}) {
     }
   };
 
-  function sessionTimedOut  () {
+  function sessionTimedOut() {
     alertMessage({
       titleMessage: 'Session Timeout',
       bodyMessage: 'Please re-login',
@@ -194,10 +216,24 @@ function ListMenu({route, navigation}) {
         setListMenu(response.data.object);
       }
     } catch (error) {
-      setErrorMessage('Something went wrong');
-      if(error.response.status === 401) {
+      console.log(error);
+      if (error.response.status === 401) {
         sessionTimedOut();
       }
+    }
+    setIsLoading(false);
+  }
+
+  async function searching() {
+    try {
+      const response = await axios.get(
+        `https://food-planet.herokuapp.com/menu/searchByName?name=${searchWord}`,
+      );
+      if (response.data.msg === 'Query success') {
+        setListMenuSearch(response.data.object);
+      }
+    } catch (error) {
+      setSearchResultEmpty(true);
     }
     setIsLoading(false);
   }
@@ -242,6 +278,19 @@ function ListMenu({route, navigation}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  React.useEffect(() => {
+    if (searchWord.length > 0) {
+      const delayDebounceFn = setTimeout(() => {
+        setIsLoading(true);
+        searching();
+      }, 1000);
+      return () => clearTimeout(delayDebounceFn);
+    } else {
+      setSearchResultEmpty(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchWord]);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
@@ -283,11 +332,23 @@ function ListMenu({route, navigation}) {
           {isLoading ? (
             <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
           ) : (
-            <FlatList
-              data={listMenu}
-              renderItem={({item, index}) => renderItem({item, index})}
-              keyExtractor={(item) => item.menuId.toString()}
-            />
+            <View>
+              {isSearchResultEmpty ? (
+                <View style={styles.notFoundWrapper}>
+                  <Image
+                    source={require('../assets/page-not-found.png')}
+                    style={styles.logoNotFound}
+                  />
+                  <Text style={styles.notFound}>Menu not found</Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={searchWord.length > 0 ? listMenuSearch : listMenu}
+                  renderItem={({item, index}) => renderItem({item, index})}
+                  keyExtractor={(item) => item.menuId.toString()}
+                />
+              )}
+            </View>
           )}
         </View>
       </ScrollView>

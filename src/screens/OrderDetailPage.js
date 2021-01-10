@@ -2,15 +2,12 @@ import * as React from 'react';
 import {
   Text,
   View,
-  Image,
   FlatList,
   ScrollView,
   SafeAreaView,
-  TouchableOpacity,
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import {RNCamera, FaceDetector} from 'react-native-camera';
 import ButtonKit from '../components/ButtonKit';
 import Title from '../components/Title';
 import theme from '../theme';
@@ -33,6 +30,7 @@ const styles = StyleSheet.create({
   title: {
     marginHorizontal: normalize(25),
     fontSize: normalize(26),
+    color: theme.colors.red,
   },
   titleFoodcourt: {
     fontWeight: 'bold',
@@ -42,10 +40,12 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     marginBottom: 10,
+    fontWeight: 'bold',
   },
   detailTitle: {
     fontWeight: 'bold',
     marginBottom: 5,
+    color: theme.colors.red,
   },
   detailContent: {
     marginBottom: 10,
@@ -68,6 +68,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 5,
     marginBottom: 15,
+    marginRight: 0.05 * SCREEN_WIDTH,
     alignSelf: 'flex-end',
   },
   totalPriceWrapper: {
@@ -77,6 +78,7 @@ const styles = StyleSheet.create({
   totalPrice: {
     fontWeight: 'bold',
     color: theme.colors.red,
+    marginRight: 0.05 * SCREEN_WIDTH,
   },
 });
 

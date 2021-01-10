@@ -11,12 +11,18 @@ import {
   Dimensions,
 } from 'react-native';
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
-import {RNCamera} from 'react-native-camera';
 import axios from 'axios';
 import theme from '../theme';
-import SpinnerKit from '../components/SpinnerKit';
-import {getData, normalize, alertMessage, storeData, removeData} from '../utils';
 import ButtonKit from '../components/ButtonKit';
+import ButtonText from '../components/ButtonText';
+import SpinnerKit from '../components/SpinnerKit';
+import {
+  getData,
+  normalize,
+  alertMessage,
+  storeData,
+  removeData,
+} from '../utils';
 import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
@@ -51,7 +57,7 @@ const styles = StyleSheet.create({
     fontSize: normalize(15),
     width: '75%',
   },
-  fcNameDateWrapper: {
+  horizontalWrapper: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -98,13 +104,21 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 80,
     height: 80,
-    backgroundColor: theme.colors.red_20,
+    backgroundColor: theme.colors.white_20,
     opacity: 0.8,
     bottom: normalize(10),
-    borderWidth: 4,
-    borderRadius: 10,
     padding: 7,
     alignSelf: 'flex-end',
+  },
+  rateOrderButton: {
+    color: theme.colors.red,
+    fontWeight: 'bold',
+    fontSize: normalize(13),
+  },
+  ratedOrderButton: {
+    color: theme.colors.black,
+    fontWeight: 'bold',
+    fontSize: normalize(13),
   },
 });
 
@@ -113,15 +127,12 @@ function OrderPage({navigation}) {
   const [isLoadingPast, setIsLoadingPast] = React.useState(false);
   const [ongoingOrder, setOngoingOrder] = React.useState([]);
   const [pastOrder, setPastOrder] = React.useState([]);
-  const [errorMessage, setErrorMessage] = React.useState('');
   const [index, setIndex] = React.useState(0);
   const {signOutGuest, signOut} = React.useContext(AuthContext);
   const [routes] = React.useState([
     {key: 'ongoing', title: 'Ongoing Order'},
     {key: 'past', title: 'Past Order'},
   ]);
-  const [barcodes, setBarcodes] = React.useState(null);
-  let camera;
 
   const renderStatus = (status) => {
     if (status === 'PROCESSING') {
@@ -187,7 +198,7 @@ function OrderPage({navigation}) {
             orderList: item.orderList,
           })
         }>
-        <View style={styles.fcNameDateWrapper}>
+        <View style={styles.horizontalWrapper}>
           <Text style={styles.fcNameStyle} numberOfLines={1}>
             {item.foodcourtName}
           </Text>
@@ -228,7 +239,7 @@ function OrderPage({navigation}) {
             orderList: item.orderList,
           })
         }>
-        <View style={styles.fcNameDateWrapper}>
+        <View style={styles.horizontalWrapper}>
           <Text style={styles.fcNameStyle} numberOfLines={1}>
             {item.foodcourtName}
           </Text>
@@ -249,7 +260,23 @@ function OrderPage({navigation}) {
             </View>
           );
         })}
-        <Text style={styles.txtStyle}>{`Seat Number : ${item.seatNum}`}</Text>
+        <View style={styles.horizontalWrapper}>
+          <Text style={styles.txtStyle}>{`Seat Number : ${item.seatNum}`}</Text>
+          <ButtonText
+            title={item.rated ? 'Rated' : 'Rate Order'}
+            txtStyle={
+              item.rated ? styles.ratedOrderButton : styles.rateOrderButton
+            }
+            onPress={() => {
+              navigation.navigate('Rating Order', {
+                orderId: item.orderId,
+                orderList: item.orderList,
+                getPastOrder: getPastOrder,
+              });
+            }}
+            disabled={item.rated}
+          />
+        </View>
       </TouchableOpacity>
     );
   };
@@ -306,20 +333,13 @@ function OrderPage({navigation}) {
               <Text style={styles.titleEmptyOrder}>There is No Past Order</Text>
             </View>
           ) : (
-            <React.Fragment>
-              <ScrollView style={styles.innerContainer}>
-                <FlatList
-                  data={pastOrder}
-                  renderItem={({item, idx}) => renderPastOrder({item, idx})}
-                  keyExtractor={(item) => item.orderId.toString()}
-                />
-              </ScrollView>
-              <ButtonKit
-                source={require('../assets/qrcode-scanner.png')}
-                onPress={() => navigation.navigate('QR Code Scanner')}
-                wrapperStyle={styles.qrCodeScanner}
+            <ScrollView style={styles.innerContainer}>
+              <FlatList
+                data={pastOrder}
+                renderItem={({item, idx}) => renderPastOrder({item, idx})}
+                keyExtractor={(item) => item.orderId.toString()}
               />
-            </React.Fragment>
+            </ScrollView>
           )}
         </View>
       )}
@@ -342,7 +362,7 @@ function OrderPage({navigation}) {
     }
   };
 
-  function sessionTimedOut () {
+  function sessionTimedOut() {
     alertMessage({
       titleMessage: 'Session Timeout',
       bodyMessage: 'Please re-login',
@@ -409,8 +429,8 @@ function OrderPage({navigation}) {
         setOngoingOrder(response.data.object);
       }
     } catch (error) {
-      setErrorMessage('Something went wrong');
-      if(error.response.status === 401) {
+      console.log(error);
+      if (error.response.status === 401) {
         sessionTimedOut();
       }
     }
@@ -428,8 +448,8 @@ function OrderPage({navigation}) {
         setPastOrder(response.data.object);
       }
     } catch (error) {
-      setErrorMessage('Something went wrong');
-      if(error.response.status === 401) {
+      console.log(error);
+      if (error.response.status === 401) {
         sessionTimedOut();
       }
     }
@@ -437,10 +457,13 @@ function OrderPage({navigation}) {
   }
 
   React.useEffect(() => {
-    getOngoingOrder();
-    getPastOrder();
+    const unsubscribe = navigation.addListener('focus', () => {
+      getOngoingOrder();
+      getPastOrder();
+    });
+    return unsubscribe;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.container}>

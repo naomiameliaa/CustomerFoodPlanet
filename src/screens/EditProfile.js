@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
 });
 
 function EditProfile({navigation, route}) {
-  const {full_name, phone_num} = route.params;
+  const {full_name, phone_num, getProfile} = route.params;
   const [fullName, onChangeFullName] = React.useState(full_name);
   const [phoneNum, onChangePhoneNum] = React.useState(phone_num);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -156,7 +156,10 @@ function EditProfile({navigation, route}) {
           titleMessage: 'Update profile Succeed',
           bodyMessage: 'Profile changed successfully',
           btnText: 'OK',
-          onPressOK: () => navigation.goBack(),
+          onPressOK: () => {
+            navigation.goBack();
+            getProfile();
+          },
           btnCancel: false,
         });
       }

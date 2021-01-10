@@ -25,6 +25,7 @@ import DetailMenuPage from './src/screens/DetailMenu';
 import DetailFoodcourtPage from './src/screens/DetailFoodcourt';
 import OrderDetailPage from './src/screens/OrderDetailPage';
 import QRCodeScanner from './src/screens/QRCodeScanner';
+import RatingOrder from './src/screens/RatingOrder';
 import messaging from '@react-native-firebase/messaging';
 
 const styles = StyleSheet.create({
@@ -113,6 +114,7 @@ function OrderStackScreen() {
         component={OrderDetailPage}
       />
       <OrderStack.Screen name="QR Code Scanner" component={QRCodeScanner} />
+      <OrderStack.Screen name="Rating Order" component={RatingOrder} />
     </OrderStack.Navigator>
   );
 }
@@ -300,15 +302,14 @@ export default function App() {
 
   React.useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+      Alert.alert(
+        'Please pick-up your food',
+        JSON.stringify(remoteMessage.notification.body),
+      );
     });
 
     return unsubscribe;
   }, []);
-
-  // if (isLoading) {
-  //   return <Splash />;
-  // }
 
   return (
     <AuthContext.Provider value={authContext}>

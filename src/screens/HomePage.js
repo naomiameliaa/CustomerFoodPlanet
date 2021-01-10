@@ -7,6 +7,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  Modal,
+  Alert,
 } from 'react-native';
 import axios from 'axios';
 import Title from '../components/Title';
@@ -20,6 +22,7 @@ import {
 import theme from '../theme';
 import SpinnerKit from '../components/SpinnerKit';
 import ButtonKit from '../components/ButtonKit';
+import ButtonText from '../components/ButtonText';
 import {AuthContext} from '../../context';
 
 const styles = StyleSheet.create({
@@ -73,6 +76,10 @@ const styles = StyleSheet.create({
   spinnerKitStyle: {
     marginTop: normalize(80),
   },
+  spinnerKitStyleModal: {
+    margin: 0,
+    flex: 0,
+  },
   horizontalWrapper: {
     flexDirection: 'row',
   },
@@ -83,11 +90,87 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
   },
+  buttonTxtStyle: {
+    fontSize: 14,
+    color: theme.colors.off_white,
+    fontWeight: 'bold',
+  },
+  btnWrapperStyle: {
+    padding: 5,
+    backgroundColor: theme.colors.red,
+    width: '45%',
+    borderRadius: 10,
+    alignSelf: 'flex-end',
+    marginTop: 10,
+  },
+});
+
+const stylesModal = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    width: '80%',
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  btnTextStyle: {
+    color: theme.colors.white,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: normalize(18),
+  },
+  btnClose: {
+    backgroundColor: theme.colors.red,
+    borderRadius: 15,
+    paddingVertical: 5,
+    paddingHorizontal: 25,
+  },
+  contentContainer: {
+    marginBottom: 30,
+  },
+  horizontalWrapper: {
+    flexDirection: 'row',
+  },
+  titleStyle: {
+    width: '50%',
+    fontWeight: 'bold',
+    fontSize: normalize(18),
+    textAlign: 'center',
+    paddingVertical: 5,
+  },
+  textStyle: {
+    width: '50%',
+    fontSize: normalize(16),
+    textAlign: 'center',
+    paddingVertical: 2,
+    borderWidth: 0.2,
+    borderColor: theme.colors.black,
+  },
 });
 
 function HomePage({navigation}) {
   const [listFoodCourt, setListFoodCourt] = React.useState([]);
+  const [seatAvailability, setSeatAvailability] = React.useState([]);
+  const [modalVisible, setModalVisible] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoadingAvailability, setIsLoadingAvailability] = React.useState(
+    false,
+  );
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
   const logout = async () => {
@@ -106,6 +189,18 @@ function HomePage({navigation}) {
     }
   };
 
+  function sessionTimedOut() {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
+
   async function getListFoodCourt() {
     setIsLoading(true);
     try {
@@ -116,20 +211,36 @@ function HomePage({navigation}) {
         setListFoodCourt(response.data.object);
       }
     } catch (error) {
+      console.log(error);
       if (error.response.status === 401) {
-        alertMessage({
-          titleMessage: 'Session Timeout',
-          bodyMessage: 'Please re-login',
-          btnText: 'OK',
-          onPressOK: () => {
-            logout();
-          },
-          btnCancel: false,
-        });
+        sessionTimedOut();
       }
     }
     setIsLoading(false);
   }
+
+  async function getAvailableSeat(foodcourtId) {
+    setIsLoadingAvailability(true);
+    try {
+      const response = await axios.get(
+        `https://food-planet.herokuapp.com/foodcourts/availableSeat?foodcourtId=${foodcourtId}`,
+      );
+      if (response.data.msg === 'Query success') {
+        setSeatAvailability(response.data.object);
+      }
+    } catch (error) {
+      console.log(error);
+      if (error.response.status === 401) {
+        sessionTimedOut();
+      }
+    }
+    setIsLoadingAvailability(false);
+  }
+
+  const checkAvailableSeat = (foodcourtId) => {
+    setModalVisible(true);
+    getAvailableSeat(foodcourtId);
+  };
 
   const renderItem = ({item, index}) => {
     const time = new Date();
@@ -162,7 +273,8 @@ function HomePage({navigation}) {
             foodcourtId: item.foodcourtId,
             foodcourtName: item.name,
           });
-        }}>
+        }}
+        disabled={result.length > 0 ? false : true}>
         <Image
           style={styles.imgStyle}
           source={{uri: `data:image/jpeg;base64,${item.image}`}}
@@ -197,8 +309,16 @@ function HomePage({navigation}) {
                 foodcourtHourList: item.openingHourList,
               })
             }
+            disabled={result.length > 0 ? false : true}
           />
         </View>
+        <ButtonText
+          title="Check Availability Seats"
+          txtStyle={styles.buttonTxtStyle}
+          wrapperStyle={styles.btnWrapperStyle}
+          onPress={() => checkAvailableSeat(item.foodcourtId)}
+          disabled={result.length > 0 ? false : true}
+        />
       </TouchableOpacity>
     );
   };
@@ -225,7 +345,49 @@ function HomePage({navigation}) {
           />
         )}
       </View>
-      {/* <Button title="Test" onPress={getListFoodCourt} /> */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+        }}>
+        <View style={stylesModal.centeredView}>
+          <View style={stylesModal.modalView}>
+            {isLoadingAvailability ? (
+              <SpinnerKit
+                sizeSpinner="large"
+                style={styles.spinnerKitStyleModal}
+              />
+            ) : (
+              <View style={stylesModal.contentContainer}>
+                <View style={stylesModal.horizontalWrapper}>
+                  <Text style={stylesModal.titleStyle}>Type Seat</Text>
+                  <Text style={stylesModal.titleStyle}>Total Seat</Text>
+                </View>
+                {Object.keys(seatAvailability).map(function (key, index) {
+                  return (
+                    <View style={stylesModal.horizontalWrapper} key={key}>
+                      <Text style={stylesModal.textStyle}>{key} (person)</Text>
+                      <Text style={stylesModal.textStyle}>
+                        {seatAvailability[key]}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+            <ButtonText
+              title="Close"
+              txtStyle={stylesModal.btnTextStyle}
+              wrapperStyle={stylesModal.btnClose}
+              onPress={() => {
+                setModalVisible(!modalVisible);
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

@@ -15,12 +15,17 @@ import axios from 'axios';
 import ButtonKit from '../components/ButtonKit';
 import Title from '../components/Title';
 import theme from '../theme';
-import {defineImageCategory} from '../components/CategoryImage';
-import {getData, normalize, alertMessage, storeData, removeData} from '../utils';
+import {
+  getData,
+  normalize,
+  alertMessage,
+  storeData,
+  removeData,
+} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
 import {AuthContext} from '../../context';
 
-const {width: SCREEN_WIDTH} = Dimensions.get('window');
+const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -37,6 +42,21 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: normalize(30),
+  },
+  notFoundWrapper: {
+    height: 0.55 * SCREEN_HEIGHT,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoNotFound: {
+    width: 130,
+    height: 130,
+  },
+  notFound: {
+    color: theme.colors.red,
+    fontSize: normalize(20),
+    fontWeight: 'bold',
+    marginTop: 20,
   },
   categoryContainer: {
     marginBottom: 30,
@@ -58,6 +78,7 @@ const styles = StyleSheet.create({
   },
   categoryName: {
     fontWeight: 'bold',
+    color: theme.colors.black,
   },
   categoryNameChoose: {
     fontWeight: 'bold',
@@ -118,11 +139,12 @@ const styles = StyleSheet.create({
 
 function ListTenant({route, navigation}) {
   const [listTenants, setListTenants] = React.useState([]);
+  const [listTenantsSearch, setListTenantsSearch] = React.useState([]);
   const [listCategory, setListCategory] = React.useState([]);
   const [filterCategory, setFilterCategory] = React.useState('');
-  const [errorMessage, setErrorMessage] = React.useState('');
   const [searchWord, onChangeSearchWord] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isSearchResultEmpty, setSearchResultEmpty] = React.useState(false);
   const {foodcourtId, foodcourtName} = route.params;
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
@@ -142,7 +164,7 @@ function ListTenant({route, navigation}) {
     }
   };
 
-  function sessionTimedOut () {
+  function sessionTimedOut() {
     alertMessage({
       titleMessage: 'Session Timeout',
       bodyMessage: 'Please re-login',
@@ -186,8 +208,8 @@ function ListTenant({route, navigation}) {
         setListTenants(response.data.object);
       }
     } catch (error) {
-      setErrorMessage('Something went wrong');
-      if(error.response.status === 401) {
+      console.log(error);
+      if (error.response.status === 401) {
         sessionTimedOut();
       }
     }
@@ -209,7 +231,10 @@ function ListTenant({route, navigation}) {
         setListTenants(response.data.object);
       }
     } catch (error) {
-      setErrorMessage('Something went wrong');
+      console.log(error);
+      if (error.response.status === 401) {
+        sessionTimedOut();
+      }
     }
     setIsLoading(false);
   }
@@ -293,19 +318,46 @@ function ListTenant({route, navigation}) {
         setListCategory(response.data.object);
       }
     } catch (error) {
-      setErrorMessage('Something went wrong');
-      if(error.response.status === 401) {
+      console.log(error);
+      if (error.response.status === 401) {
         sessionTimedOut();
       }
     }
     setIsLoading(false);
   }
 
+  async function searching() {
+    try {
+      const response = await axios.get(
+        `https://food-planet.herokuapp.com/tenants/searchByName?name=${searchWord}`,
+      );
+      if (response.data.msg === 'Query success') {
+        setListTenantsSearch(response.data.object);
+      }
+    } catch (error) {
+      setSearchResultEmpty(true);
+    }
+    setIsLoading(false);
+  }
+
   React.useEffect(() => {
-    getListTenants();
     getListCategory();
+    getListTenants();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  React.useEffect(() => {
+    if (searchWord.length > 0) {
+      const delayDebounceFn = setTimeout(() => {
+        setIsLoading(true);
+        searching();
+      }, 1000);
+      return () => clearTimeout(delayDebounceFn);
+    } else {
+      setSearchResultEmpty(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchWord]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -334,23 +386,33 @@ function ListTenant({route, navigation}) {
           text={`What would you like to eat at ${foodcourtName}?`}
           txtStyle={styles.titleStyle}
         />
+        <FlatList
+          data={listCategory}
+          renderItem={({item, index}) => renderItemCategory({item, index})}
+          keyExtractor={(item, index) => index.toString()}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.categoryContainer}
+        />
         {isLoading ? (
           <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
         ) : (
           <View>
-            <FlatList
-              data={listCategory}
-              renderItem={({item, index}) => renderItemCategory({item, index})}
-              keyExtractor={(item, index) => index.toString()}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.categoryContainer}
-            />
-            <FlatList
-              data={listTenants}
-              renderItem={({item, index}) => renderItem({item, index})}
-              keyExtractor={(item) => item.tenantId.toString()}
-            />
+            {isSearchResultEmpty ? (
+              <View style={styles.notFoundWrapper}>
+                <Image
+                  source={require('../assets/page-not-found.png')}
+                  style={styles.logoNotFound}
+                />
+                <Text style={styles.notFound}>Tenant not found</Text>
+              </View>
+            ) : (
+              <FlatList
+                data={searchWord.length > 0 ? listTenantsSearch : listTenants}
+                renderItem={({item, index}) => renderItem({item, index})}
+                keyExtractor={(item) => item.tenantId.toString()}
+              />
+            )}
           </View>
         )}
       </ScrollView>

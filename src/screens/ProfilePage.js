@@ -329,6 +329,7 @@ function ProfilePage({navigation}) {
                 navigation.navigate('Edit Profile', {
                   full_name: dataProfile.fullname,
                   phone_num: dataProfile.phoneNumber,
+                  getProfile: getProfile,
                 })
               }
               disabled={dataUserGuest.isGuest ? true : false}

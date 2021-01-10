@@ -54,22 +54,40 @@ const styles = StyleSheet.create({
   menuQtyStyle: {
     width: 0.12 * SCREEN_WIDTH,
     fontSize: normalize(14),
+    fontWeight: 'bold',
   },
   menuNameStyle: {
     width: 0.6 * SCREEN_WIDTH,
     fontSize: normalize(14),
+    fontWeight: 'bold',
   },
   menuPriceStyle: {
     width: 0.33 * SCREEN_WIDTH,
     fontSize: normalize(14),
+    fontWeight: 'bold',
+  },
+  notes: {
+    width: 0.7 * SCREEN_WIDTH,
+    marginLeft: 0.12 * SCREEN_WIDTH,
+    alignSelf: 'flex-start',
+    fontSize: normalize(14),
   },
   editButton: {
     marginLeft: 0.12 * SCREEN_WIDTH,
-    color: theme.colors.dark_grey,
+    color: theme.colors.red,
     alignSelf: 'flex-start',
   },
   inputStyle: {
     borderColor: theme.colors.black,
+    borderWidth: 1,
+    width: 0.12 * SCREEN_WIDTH,
+    height: normalize(20),
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    fontSize: normalize(14),
+  },
+  inputStyleError: {
+    borderColor: theme.colors.red,
     borderWidth: 1,
     width: 0.12 * SCREEN_WIDTH,
     height: normalize(20),
@@ -248,6 +266,8 @@ function CartPage({navigation}) {
     } else {
       order();
       setCartData(null);
+      setValue(null);
+      onChangeSeatCapacity('');
     }
   };
 
@@ -303,6 +323,11 @@ function CartPage({navigation}) {
                     {renderPrice(itm.menu.price)}
                   </Text>
                 </View>
+                {itm.notes !== 'null' && (
+                  <Text style={styles.notes} numberOfLines={1}>
+                    Notes: {itm.notes}
+                  </Text>
+                )}
                 <ButtonText
                   title="Edit"
                   txtStyle={styles.editButton}
@@ -328,13 +353,13 @@ function CartPage({navigation}) {
     );
   };
 
-  React.useEffect(
-    () => {
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
       getCartData();
-    },
+    });
+    return unsubscribe;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -367,7 +392,11 @@ function CartPage({navigation}) {
                   <Text>(max. 10)</Text>
                 </View>
                 <TextInput
-                  style={styles.inputStyle}
+                  style={
+                    seatCapacity > 10 || seatCapacity.length <= 0
+                      ? styles.inputStyleError
+                      : styles.inputStyle
+                  }
                   onChangeText={(text) => onChangeSeatCapacity(text)}
                   value={seatCapacity}
                   textContentType="none"

@@ -191,7 +191,7 @@ function RegisterMember({navigation}) {
         />
         <Title text="Register as Member" txtStyle={styles.txtTitle} />
         <Text style={styles.content}>
-          Please enter your email to register as member.
+          Please fill out this form to register as member.
         </Text>
         <View style={styles.inputContainer}>
           <TextInput
