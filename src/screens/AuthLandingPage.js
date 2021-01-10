@@ -112,7 +112,6 @@ function AuthLandingPage({navigation}) {
   };
 
   const validationLogin = async () => {
-    console.log('data Guesss', guestData);
     if (guestData !== null) {
       login();
     } else {

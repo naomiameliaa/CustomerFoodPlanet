@@ -88,12 +88,10 @@ function QRCodeScanner({navigation}) {
   async function setSeatAvailable(seatId) {
     setIsLoading(true);
     const userId = await checkUserGuest();
-    console.log(userId);
     try {
       const response = await axios.post(
         `https://food-planet.herokuapp.com/orders/setSeatAvailable?userId=${userId}&seatId=${seatId}`,
       );
-      console.log(response.data);
       if (response.data.msg === 'Success set seat available') {
         alertMessage({
           titleMessage: 'Success',
@@ -104,7 +102,6 @@ function QRCodeScanner({navigation}) {
         });
       }
     } catch (error) {
-      console.log(error.response.data);
       if (error.response.status === 401) {
         await sessionTimedOut();
       } else {

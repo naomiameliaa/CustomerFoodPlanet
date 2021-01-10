@@ -286,7 +286,9 @@ function ProfilePage({navigation}) {
   }
 
   const renderPrice = (price) => {
-    if(price === undefined || price === null) return;
+    if (price === undefined || price === null) {
+      return;
+    }
     let i;
     let tempPrice = '';
     let ctr = 0;
@@ -359,33 +361,33 @@ function ProfilePage({navigation}) {
             />
           </View>
         </View>
-        {(dataUserGuest?.balance !== null && dataUserGuest?.point !== null) && (
-            <>
-              {isLoadingQuery ? (
-                <SpinnerKit sizeSpinner="large" />
-              ) : (
-                <View style={styles.walletPointContainer}>
-                  <View style={styles.walletWrapper}>
-                    <Image
-                      style={styles.walletStyle}
-                      source={require('../assets/wallet.png')}
-                    />
-                    <View style={styles.txtWalletWrapper}>
-                      <Text style={styles.txtWallet}>Rp</Text>
-                      <Text style={styles.nominalWallet}>
-                        {renderPrice(dataUserGuest.balance)}
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.pointWrapper}>
-                    <Text style={styles.nominalPoint}>
-                      {renderPrice(dataUserGuest.point)}
+        {dataUserGuest?.balance !== null && dataUserGuest?.point !== null && (
+          <>
+            {isLoadingQuery ? (
+              <SpinnerKit sizeSpinner="large" />
+            ) : (
+              <View style={styles.walletPointContainer}>
+                <View style={styles.walletWrapper}>
+                  <Image
+                    style={styles.walletStyle}
+                    source={require('../assets/wallet.png')}
+                  />
+                  <View style={styles.txtWalletWrapper}>
+                    <Text style={styles.txtWallet}>Rp</Text>
+                    <Text style={styles.nominalWallet}>
+                      {renderPrice(dataUserGuest.balance)}
                     </Text>
-                    <Text style={styles.txtPoint}>points</Text>
                   </View>
                 </View>
-              )}
-            </>
+                <View style={styles.pointWrapper}>
+                  <Text style={styles.nominalPoint}>
+                    {renderPrice(dataUserGuest.point)}
+                  </Text>
+                  <Text style={styles.txtPoint}>points</Text>
+                </View>
+              </View>
+            )}
+          </>
         )}
         <View style={styles.btnContainer}>
           {dataUserGuest.isGuest && (

@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import axios from 'axios';
 
-const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
 // based on iphone 5s's scale
 const scale = SCREEN_WIDTH / 320;
@@ -76,14 +76,14 @@ export const alertMessage = ({
 };
 
 export const getUserId = async () => {
-  const dataUser = await getData("userData");
-  const dataGuest = await getData("guestData");
+  const dataUser = await getData('userData');
+  const dataGuest = await getData('guestData');
   if (dataUser !== null) {
     return dataUser.userId;
   } else {
     return dataGuest.userId;
   }
-}
+};
 
 export const saveFcmToken = async () => {
   const fcmToken = await messaging().getToken();
@@ -91,10 +91,9 @@ export const saveFcmToken = async () => {
     const userId = await getUserId();
     try {
       const response = await axios.post(
-          `https://food-planet.herokuapp.com/users/saveNotificationToken?userId=${userId}&token=${fcmToken}`,
+        `https://food-planet.herokuapp.com/users/saveNotificationToken?userId=${userId}&token=${fcmToken}`,
       );
       if (response.data.status === true) {
-
       }
     } catch (error) {
       console.log(error.response);
@@ -102,4 +101,4 @@ export const saveFcmToken = async () => {
   } else {
     console.log('Failed', 'No token received');
   }
-}
+};

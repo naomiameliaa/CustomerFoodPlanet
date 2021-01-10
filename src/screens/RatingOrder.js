@@ -91,7 +91,6 @@ function RatingOrder({navigation, route}) {
           ratings: ratings,
         },
       );
-      console.log(response.data);
       if (response.data.msg === 'Rate order success') {
         alertMessage({
           titleMessage: 'Success',
@@ -102,7 +101,6 @@ function RatingOrder({navigation, route}) {
         });
       }
     } catch (error) {
-      console.log(error.response.data);
       if (error.response.status === 401) {
         await sessionTimedOut();
       } else {
