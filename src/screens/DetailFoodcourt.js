@@ -4,19 +4,13 @@ import {
   View,
   StyleSheet,
   SafeAreaView,
-  TouchableOpacity,
   FlatList,
   Image,
-  TextInput,
-  Dimensions,
   ScrollView,
 } from 'react-native';
 import ButtonKit from '../components/ButtonKit';
 import Title from '../components/Title';
-import theme from '../theme';
 import {normalize} from '../utils';
-
-const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -48,14 +42,14 @@ const styles = StyleSheet.create({
   },
   contentTitle: {
     fontWeight: 'bold',
-    width: '38%',
+    width: '33%',
   },
   contentDetail: {
     width: '60%',
   },
   dayStyle: {
     fontWeight: 'bold',
-    width: '55%',
+    width: '49%',
   },
 });
 

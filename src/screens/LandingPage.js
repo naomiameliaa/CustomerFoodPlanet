@@ -36,13 +36,13 @@ const styles = StyleSheet.create({
   },
   txtContent: {
     color: theme.colors.white,
-    width: SCREEN_WIDTH * 0.7,
+    width: SCREEN_WIDTH * 0.8,
     fontSize: normalize(18),
     lineHeight: 25,
     marginBottom: 20,
   },
   txtButton: {
-    fontSize: 20,
+    fontSize: normalize(16),
     fontWeight: 'bold',
   },
   btnWrapper: {

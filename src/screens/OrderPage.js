@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
   },
   labelStyle: {
     fontWeight: 'bold',
-    fontSize: normalize(16),
+    fontSize: normalize(14),
     textAlign: 'center',
   },
   orderContainer: {
@@ -91,6 +91,7 @@ const styles = StyleSheet.create({
     fontSize: normalize(20),
     fontWeight: 'bold',
     marginVertical: 10,
+    textAlign: 'center',
   },
   preview: {
     flex: 1,

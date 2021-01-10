@@ -12,9 +12,7 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {alertMessage, getData, removeData, storeData} from '../utils';
-import {AuthContext} from '../../context';
-
+import {alertMessage, normalize} from '../utils';
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
@@ -38,13 +36,27 @@ const styles = StyleSheet.create({
   },
   inputStyle: {
     width: '90%',
-    height: 40,
+    height: normalize(42),
     borderRadius: 20,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: 16,
     paddingHorizontal: 20,
+    paddingVertical: 'auto',
     marginVertical: 10,
     justifyContent: 'center',
+  },
+  inputStyleError: {
+    width: '90%',
+    height: normalize(42),
+    borderRadius: 20,
+    backgroundColor: theme.colors.white,
+    fontSize: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 'auto',
+    marginVertical: 10,
+    justifyContent: 'center',
+    borderColor: theme.colors.red,
+    borderWidth: 1,
   },
   content: {
     width: SCREEN_WIDTH * 0.8,
@@ -56,6 +68,7 @@ const styles = StyleSheet.create({
   sendTxt: {
     color: theme.colors.white,
     fontSize: 18,
+    fontWeight: 'bold',
   },
   sendWrapper: {
     backgroundColor: theme.colors.red,
@@ -64,95 +77,61 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginVertical: 10,
   },
-  signUpTxt: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginHorizontal: 5,
-  },
-  signUpBtn: {
-    color: theme.colors.red,
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  signUpWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
-    marginVertical: 20,
-  },
 });
 
 function ForgotPassword({navigation}) {
   const [email, onChangeEmail] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
-  const {signOutGuest, signOut} = React.useContext(AuthContext);
 
-  const logout = async () => {
-    const dataUser = await getData('userData');
-    const dataGuest = await getData('guestData');
-    if (dataUser !== null) {
-      await removeData('userData');
-      await signOut();
+  function checkInput() {
+    if (email.length === 0) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Email field is required!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else if (!validateEmail) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Email is invalid!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
     } else {
-      const dataGuestUpdated = {
-        ...dataGuest,
-        isLogin: false,
-      };
-      await storeData('guestData', dataGuestUpdated);
-      await signOutGuest(dataGuestUpdated);
+      sendEmail();
     }
-  };
+  }
 
-  function sessionTimedOut() {
-    alertMessage({
-      titleMessage: 'Session Timeout',
-      bodyMessage: 'Please re-login',
-      btnText: 'OK',
-      onPressOK: () => {
-        logout();
-      },
-      btnCancel: false,
-    });
+  function validateEmail() {
+    var regExp = /\S+@\S+\.\S+/;
+    return regExp.test(email);
   }
 
   async function sendEmail() {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `https://food-planet.herokuapp.com/users/forgotPassword?email=${email}`,
+        `https://food-planet.herokuapp.com/users/forgotPassword?email=${email.toLowerCase()}`,
       );
       if (response.data.msg === 'Forgot password success') {
         alertMessage({
           titleMessage: 'Success',
           bodyMessage: 'Please kindly check your email',
           btnText: 'OK',
+          onPressOK: () => navigation.navigate('AuthLandingPage'),
           btnCancel: true,
         });
       }
     } catch (error) {
-      if (error.response.status === 401) {
-        sessionTimedOut();
-      } else {
-        alertMessage({
-          titleMessage: 'Failed',
-          bodyMessage: 'Please try again later',
-          btnText: 'Try Again',
-          btnCancel: true,
-        });
-      }
-    }
-    setIsLoading(false);
-  }
-
-  function validationEmail() {
-    if (email === '') {
       alertMessage({
-        titleMessage: 'Error',
-        bodyMessage: 'Email field is required',
-        btnText: 'OK',
+        titleMessage: 'Failed',
+        bodyMessage: 'Please try again later',
+        btnText: 'Try Again',
         btnCancel: true,
       });
     }
-    sendEmail();
+    setIsLoading(false);
   }
 
   return (
@@ -170,7 +149,11 @@ function ForgotPassword({navigation}) {
         </Text>
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.inputStyle}
+            style={
+              !validateEmail || email.length === 0
+                ? styles.inputStyleError
+                : styles.inputStyle
+            }
             onChangeText={(text) => onChangeEmail(text)}
             value={email}
             textContentType="emailAddress"
@@ -180,7 +163,7 @@ function ForgotPassword({navigation}) {
             title="Send"
             txtStyle={styles.sendTxt}
             wrapperStyle={styles.sendWrapper}
-            onPress={() => validationEmail()}
+            onPress={() => checkInput()}
             isLoading={isLoading}
           />
         </View>

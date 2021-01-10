@@ -5,7 +5,13 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {getData, removeData, storeData, alertMessage} from '../utils';
+import {
+  getData,
+  removeData,
+  storeData,
+  alertMessage,
+  normalize,
+} from '../utils';
 import {AuthContext} from '../../context';
 
 const styles = StyleSheet.create({
@@ -29,13 +35,27 @@ const styles = StyleSheet.create({
   },
   inputStyle: {
     width: '90%',
-    height: 40,
+    height: normalize(42),
     borderRadius: 20,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: 16,
     paddingHorizontal: 20,
+    paddingVertical: 'auto',
     marginVertical: 10,
     justifyContent: 'center',
+  },
+  inputStyleError: {
+    width: '90%',
+    height: normalize(42),
+    borderRadius: 20,
+    backgroundColor: theme.colors.white,
+    fontSize: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 'auto',
+    marginVertical: 10,
+    justifyContent: 'center',
+    borderColor: theme.colors.red,
+    borderWidth: 1,
   },
   signUpTxt: {
     color: theme.colors.white,
@@ -82,6 +102,31 @@ function EditProfile({navigation, route}) {
   const [phoneNum, onChangePhoneNum] = React.useState(phone_num);
   const [isLoading, setIsLoading] = React.useState(false);
   const {signOutGuest, signOut} = React.useContext(AuthContext);
+
+  function checkInput() {
+    if (fullName.length === 0 || phoneNum.length === 0) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'All data must be filled!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else if (!validatePhoneNumber) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Phone Number is invalid!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else {
+      editProfile();
+    }
+  }
+
+  function validatePhoneNumber() {
+    var regExp = /\+?([ -]?\d+)+|\(\d+\)([ -]\d+)/g;
+    return regExp.test(phoneNum);
+  }
 
   const getDataUser = async () => {
     const dataUser = await getData('userData');
@@ -189,14 +234,20 @@ function EditProfile({navigation, route}) {
         <Title txtStyle={styles.txtTitle} text="Edit your Profile" />
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.inputStyle}
+            style={
+              fullName.length === 0 ? styles.inputStyleError : styles.inputStyle
+            }
             onChangeText={(text) => onChangeFullName(text)}
             value={fullName}
             textContentType="name"
             placeholder="Full Name"
           />
           <TextInput
-            style={styles.inputStyle}
+            style={
+              !validatePhoneNumber || phoneNum.length === 0
+                ? styles.inputStyleError
+                : styles.inputStyle
+            }
             onChangeText={(text) => onChangePhoneNum(text)}
             value={phoneNum}
             textContentType="telephoneNumber"
@@ -207,7 +258,7 @@ function EditProfile({navigation, route}) {
             title="Submit"
             txtStyle={styles.signUpTxt}
             wrapperStyle={styles.signUpWrapper}
-            onPress={editProfile}
+            onPress={() => checkInput()}
             isLoading={isLoading}
           />
         </View>

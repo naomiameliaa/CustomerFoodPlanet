@@ -76,8 +76,9 @@ const styles = StyleSheet.create({
   inputStyle: {
     backgroundColor: theme.colors.white,
     fontSize: normalize(16),
-    height: 40,
+    height: normalize(42),
     paddingHorizontal: 10,
+    paddingVertical: 'auto',
     marginVertical: 10,
     borderWidth: 1,
     justifyContent: 'center',

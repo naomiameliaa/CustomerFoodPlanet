@@ -267,6 +267,7 @@ export default function App() {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const [isLoading, setIsLoading] = React.useState(true);
   const [userData, setUserData] = React.useState(null);
   const [isGuest, setIsGuest] = React.useState(false);

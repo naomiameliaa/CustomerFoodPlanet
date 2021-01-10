@@ -4,7 +4,7 @@ import {normalize} from '../utils';
 
 const styles = StyleSheet.create({
   textStyle: {
-    fontSize: normalize(28),
+    fontSize: normalize(24),
     fontWeight: 'bold',
     marginBottom: 20,
   },

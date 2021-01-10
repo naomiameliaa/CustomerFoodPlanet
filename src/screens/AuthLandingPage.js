@@ -13,7 +13,13 @@ import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import {AuthContext} from '../../context';
-import {getData, storeData, alertMessage, saveFcmToken} from '../utils';
+import {
+  getData,
+  storeData,
+  alertMessage,
+  saveFcmToken,
+  normalize,
+} from '../utils';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -31,11 +37,8 @@ const styles = StyleSheet.create({
   },
   buttonTxtLogin: {
     color: theme.colors.red,
-    fontSize: 20,
+    fontSize: normalize(18),
     fontWeight: 'bold',
-  },
-  btnWrapperLogin: {
-    width: '20%',
   },
   contentWrapper: {
     alignItems: 'center',
@@ -46,9 +49,9 @@ const styles = StyleSheet.create({
     height: SCREEN_HEIGHT * 0.55,
   },
   imgWrapper: {
-    width: '90%',
-    height: SCREEN_HEIGHT * 0.4,
-    marginTop: 30,
+    width: '80%',
+    height: SCREEN_HEIGHT * 0.35,
+    marginTop: normalize(10),
     alignItems: 'center',
   },
   imgStyle: {
@@ -60,32 +63,33 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   txtContent: {
-    width: '65%',
+    width: '85%',
     textAlign: 'center',
     lineHeight: 20,
-    fontSize: 16,
+    fontSize: normalize(16),
   },
   slider: {
     alignSelf: 'center',
     justifyContent: 'center',
     alignItems: 'center',
-    height: SCREEN_HEIGHT * 0.65,
+    height: SCREEN_HEIGHT * 0.62,
   },
   dotContainer: {
     backgroundColor: 'transparent',
     position: 'absolute',
-    bottom: 20,
+    bottom: 0,
   },
   buttonContainer: {
     alignItems: 'center',
     paddingVertical: 20,
   },
   buttonTxtStyle: {
-    fontSize: 18,
+    fontSize: normalize(18),
     color: theme.colors.off_white,
+    fontWeight: 'bold',
   },
   btnWrapperStyle: {
-    padding: 16,
+    padding: 12,
     backgroundColor: theme.colors.red,
     width: '70%',
     borderRadius: 30,
@@ -126,7 +130,7 @@ function AuthLandingPage({navigation}) {
             role: 'customer',
           },
           auth: {
-            username: guestData.email,
+            username: guestData.email.toLowerCase(),
             password: guestData.password,
           },
         },
@@ -190,7 +194,6 @@ function AuthLandingPage({navigation}) {
           <ButtonText
             title="Log in"
             txtStyle={styles.buttonTxtLogin}
-            wrapperStyle={styles.btnWrapperLogin}
             onPress={() => {
               navigation.navigate('LoginPage');
             }}

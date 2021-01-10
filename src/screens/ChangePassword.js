@@ -51,21 +51,23 @@ const styles = StyleSheet.create({
   },
   inputStyle: {
     width: '90%',
-    height: 40,
+    height: normalize(42),
     borderRadius: 20,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: 16,
     paddingHorizontal: 20,
+    paddingVertical: 'auto',
     marginVertical: 10,
     justifyContent: 'center',
   },
   inputStyleError: {
     width: '90%',
-    height: 40,
-    borderRadius: 10,
+    height: normalize(42),
+    borderRadius: 20,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: 16,
     paddingHorizontal: 20,
+    paddingVertical: 'auto',
     marginVertical: 10,
     justifyContent: 'center',
     borderColor: theme.colors.red,
@@ -74,6 +76,7 @@ const styles = StyleSheet.create({
   btnText: {
     color: theme.colors.white,
     fontSize: 18,
+    fontWeight: 'bold',
   },
   btnWrapper: {
     backgroundColor: theme.colors.red,
@@ -120,6 +123,18 @@ function ChangePassword({navigation}) {
   };
 
   async function validationPassword() {
+    if (
+      oldPassword.length === 0 ||
+      password.length === 0 ||
+      confirmPassword === 0
+    ) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'All fields are required!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    }
     if (confirmPassword !== password) {
       alertMessage({
         titleMessage: 'Error',
@@ -204,7 +219,11 @@ function ChangePassword({navigation}) {
         </Text>
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.inputStyle}
+            style={
+              oldPassword.length === 0
+                ? styles.inputStyleError
+                : styles.inputStyle
+            }
             onChangeText={(text) => onChangeOldPassword(text)}
             value={oldPassword}
             textContentType="password"
@@ -214,7 +233,7 @@ function ChangePassword({navigation}) {
           />
           <TextInput
             style={
-              confirmPassword !== password
+              confirmPassword !== password || password.length === 0
                 ? styles.inputStyleError
                 : styles.inputStyle
             }
@@ -227,7 +246,7 @@ function ChangePassword({navigation}) {
           />
           <TextInput
             style={
-              confirmPassword !== password
+              confirmPassword !== password || confirmPassword.length === 0
                 ? styles.inputStyleError
                 : styles.inputStyle
             }
@@ -242,7 +261,7 @@ function ChangePassword({navigation}) {
             title="Submit"
             txtStyle={styles.btnText}
             wrapperStyle={styles.btnWrapper}
-            onPress={validationPassword}
+            onPress={() => validationPassword()}
             isLoading={isLoading}
           />
         </View>

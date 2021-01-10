@@ -51,17 +51,32 @@ const styles = StyleSheet.create({
   },
   inputStyle: {
     width: '90%',
-    height: 40,
+    height: normalize(42),
     borderRadius: 20,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: 16,
     paddingHorizontal: 20,
+    paddingVertical: 'auto',
     marginVertical: 10,
     justifyContent: 'center',
+  },
+  inputStyleError: {
+    width: '90%',
+    height: normalize(42),
+    borderRadius: 20,
+    backgroundColor: theme.colors.white,
+    fontSize: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 'auto',
+    marginVertical: 10,
+    justifyContent: 'center',
+    borderColor: theme.colors.red,
+    borderWidth: 1,
   },
   btnTxt: {
     color: theme.colors.white,
     fontSize: 18,
+    fontWeight: 'bold',
   },
   btnWrapper: {
     backgroundColor: theme.colors.red,
@@ -76,6 +91,31 @@ function ChangeEmail({navigation}) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [email, onChangeEmail] = React.useState('');
   const {signOutGuest, signOut} = React.useContext(AuthContext);
+
+  function checkInput() {
+    if (email.length === 0) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Email field is required!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else if (!validateEmail) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Email is invalid!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else {
+      changeEmail();
+    }
+  }
+
+  function validateEmail() {
+    var regExp = /\S+@\S+\.\S+/;
+    return regExp.test(email);
+  }
 
   const getDataUser = async () => {
     const dataUser = await getData('userData');
@@ -176,7 +216,11 @@ function ChangeEmail({navigation}) {
         <Text style={styles.content}>Please enter your new email.</Text>
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.inputStyle}
+            style={
+              !validateEmail || email.length === 0
+                ? styles.inputStyleError
+                : styles.inputStyle
+            }
             onChangeText={(text) => onChangeEmail(text)}
             value={email}
             textContentType="emailAddress"
@@ -186,7 +230,7 @@ function ChangeEmail({navigation}) {
             title="Submit"
             txtStyle={styles.btnTxt}
             wrapperStyle={styles.btnWrapper}
-            onPress={changeEmail}
+            onPress={() => checkInput()}
             isLoading={isLoading}
           />
         </View>

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  ScrollView,
   View,
   TextInput,
   Text,
@@ -44,24 +45,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.grey,
     marginHorizontal: 20,
-    marginBottom: 30,
+    marginBottom: 10,
   },
   inputContainer: {
     alignItems: 'center',
   },
   inputStyle: {
     width: '90%',
-    height: 40,
+    height: normalize(42),
     borderRadius: 20,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: 16,
     paddingHorizontal: 20,
+    paddingVertical: 'auto',
     marginVertical: 10,
     justifyContent: 'center',
+  },
+  inputStyleError: {
+    width: '90%',
+    height: normalize(42),
+    borderRadius: 20,
+    backgroundColor: theme.colors.white,
+    fontSize: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 'auto',
+    marginVertical: 10,
+    justifyContent: 'center',
+    borderColor: theme.colors.red,
+    borderWidth: 1,
   },
   signUpTxt: {
     color: theme.colors.white,
     fontSize: 18,
+    fontWeight: 'bold',
   },
   signUpWrapper: {
     backgroundColor: theme.colors.red,
@@ -79,6 +95,48 @@ function RegisterMember({navigation}) {
   const [password, onChangePassword] = React.useState('');
   const [phoneNum, onChangePhoneNum] = React.useState('');
   const {signOutGuest, signOut} = React.useContext(AuthContext);
+
+  function checkSignUp() {
+    if (
+      fullName.length === 0 ||
+      email.length === 0 ||
+      password.length === 0 ||
+      phoneNum.length === 0
+    ) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'All data must be filled!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else if (!validateEmail) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Email is invalid!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else if (!validatePhoneNumber) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Phone Number is invalid!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else {
+      registerAsMember();
+    }
+  }
+
+  function validateEmail() {
+    var regExp = /\S+@\S+\.\S+/;
+    return regExp.test(email);
+  }
+
+  function validatePhoneNumber() {
+    var regExp = /\+?([ -]?\d+)+|\(\d+\)([ -]\d+)/g;
+    return regExp.test(phoneNum);
+  }
 
   const getDataUser = async () => {
     const dataUser = await getData('userData');
@@ -183,7 +241,7 @@ function RegisterMember({navigation}) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.innerContainer}>
+      <ScrollView style={styles.innerContainer}>
         <ButtonKit
           wrapperStyle={styles.backButton}
           source={require('../assets/back-button.png')}
@@ -195,21 +253,29 @@ function RegisterMember({navigation}) {
         </Text>
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.inputStyle}
+            style={
+              fullName.length === 0 ? styles.inputStyleError : styles.inputStyle
+            }
             onChangeText={(text) => onChangeFullName(text)}
             value={fullName}
             textContentType="name"
             placeholder="Full Name"
           />
           <TextInput
-            style={styles.inputStyle}
+            style={
+              !validateEmail || email.length === 0
+                ? styles.inputStyleError
+                : styles.inputStyle
+            }
             onChangeText={(text) => onChangeEmail(text)}
             value={email}
             textContentType="emailAddress"
             placeholder="Email"
           />
           <TextInput
-            style={styles.inputStyle}
+            style={
+              password.length === 0 ? styles.inputStyleError : styles.inputStyle
+            }
             onChangeText={(text) => onChangePassword(text)}
             value={password}
             textContentType="password"
@@ -217,7 +283,11 @@ function RegisterMember({navigation}) {
             secureTextEntry={true}
           />
           <TextInput
-            style={styles.inputStyle}
+            style={
+              !validatePhoneNumber || phoneNum.length === 0
+                ? styles.inputStyleError
+                : styles.inputStyle
+            }
             onChangeText={(text) => onChangePhoneNum(text)}
             value={phoneNum}
             textContentType="telephoneNumber"
@@ -228,11 +298,11 @@ function RegisterMember({navigation}) {
             title="Sign up"
             txtStyle={styles.signUpTxt}
             wrapperStyle={styles.signUpWrapper}
-            onPress={registerAsMember}
+            onPress={() => checkSignUp()}
             isLoading={isLoading}
           />
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

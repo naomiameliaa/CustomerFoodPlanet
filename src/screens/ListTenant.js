@@ -94,10 +94,11 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH * 0.8,
     borderRadius: 20,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: normalize(18),
     left: 0,
     paddingHorizontal: normalize(50),
-    height: 40,
+    paddingVertical: 'auto',
+    height: normalize(42),
   },
   searchWrapper: {
     flexDirection: 'row',

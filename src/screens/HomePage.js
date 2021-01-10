@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: normalize(15),
   },
   boxContainer: {
-    height: normalize(220),
+    height: 290,
     marginBottom: normalize(10),
   },
   scrollVertical: {
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
   },
   imgStyle: {
     width: '100%',
-    height: 200,
+    height: 190,
     marginBottom: 10,
   },
   titleFoodCourt: {
@@ -91,17 +91,17 @@ const styles = StyleSheet.create({
     height: 20,
   },
   buttonTxtStyle: {
-    fontSize: 14,
-    color: theme.colors.off_white,
+    fontSize: normalize(14),
+    color: theme.colors.white,
     fontWeight: 'bold',
   },
   btnWrapperStyle: {
-    padding: 5,
+    paddingVertical: 5,
     backgroundColor: theme.colors.red,
-    width: '45%',
+    width: 200,
     borderRadius: 10,
     alignSelf: 'flex-end',
-    marginTop: 10,
+    marginTop: 0,
   },
 });
 
@@ -149,13 +149,13 @@ const stylesModal = StyleSheet.create({
   titleStyle: {
     width: '50%',
     fontWeight: 'bold',
-    fontSize: normalize(18),
+    fontSize: normalize(16),
     textAlign: 'center',
     paddingVertical: 5,
   },
   textStyle: {
     width: '50%',
-    fontSize: normalize(16),
+    fontSize: normalize(15),
     textAlign: 'center',
     paddingVertical: 2,
     borderWidth: 0.2,

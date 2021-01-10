@@ -1,11 +1,18 @@
 import * as React from 'react';
-import {View, Text, TextInput, SafeAreaView, StyleSheet} from 'react-native';
+import {
+  ScrollView,
+  View,
+  Text,
+  TextInput,
+  SafeAreaView,
+  StyleSheet,
+} from 'react-native';
 import axios from 'axios';
 import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {alertMessage} from '../utils';
+import {alertMessage, normalize} from '../utils';
 
 const styles = StyleSheet.create({
   container: {
@@ -27,17 +34,32 @@ const styles = StyleSheet.create({
   },
   inputStyle: {
     width: '90%',
-    height: 40,
+    height: normalize(42),
     borderRadius: 20,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: 16,
     paddingHorizontal: 20,
+    paddingVertical: 'auto',
     marginVertical: 10,
     justifyContent: 'center',
+  },
+  inputStyleError: {
+    width: '90%',
+    height: normalize(42),
+    borderRadius: 20,
+    backgroundColor: theme.colors.white,
+    fontSize: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 'auto',
+    marginVertical: 10,
+    justifyContent: 'center',
+    borderColor: theme.colors.red,
+    borderWidth: 1,
   },
   signUpTxt: {
     color: theme.colors.white,
     fontSize: 18,
+    fontWeight: 'bold',
   },
   signUpWrapper: {
     backgroundColor: theme.colors.red,
@@ -62,11 +84,11 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   TCTxt: {
-    fontSize: 15,
-    marginHorizontal: 5,
+    fontSize: normalize(14),
+    textAlign: 'center',
   },
   TCBtn: {
-    fontSize: 15,
+    fontSize: normalize(14),
     fontWeight: 'bold',
   },
   TCWrapper: {
@@ -80,6 +102,48 @@ function RegisterPage({navigation}) {
   const [password, onChangePassword] = React.useState('');
   const [phoneNum, onChangePhoneNum] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+
+  function checkSignUp() {
+    if (
+      fullName.length === 0 ||
+      email.length === 0 ||
+      password.length === 0 ||
+      phoneNum.length === 0
+    ) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'All data must be filled!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else if (!validateEmail) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Email is invalid!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else if (!validatePhoneNumber) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Phone Number is invalid!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else {
+      signUp();
+    }
+  }
+
+  function validateEmail() {
+    var regExp = /\S+@\S+\.\S+/;
+    return regExp.test(email);
+  }
+
+  function validatePhoneNumber() {
+    var regExp = /\+?([ -]?\d+)+|\(\d+\)([ -]\d+)/g;
+    return regExp.test(phoneNum);
+  }
 
   async function signUp() {
     setIsLoading(true);
@@ -116,7 +180,7 @@ function RegisterPage({navigation}) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.innerContainer}>
+      <ScrollView style={styles.innerContainer}>
         <ButtonKit
           wrapperStyle={styles.backButton}
           source={require('../assets/back-button.png')}
@@ -125,21 +189,29 @@ function RegisterPage({navigation}) {
         <Title txtStyle={styles.txtTitle} text="Create your account" />
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.inputStyle}
+            style={
+              fullName.length === 0 ? styles.inputStyleError : styles.inputStyle
+            }
             onChangeText={(text) => onChangeFullName(text)}
             value={fullName}
             textContentType="name"
             placeholder="Full Name"
           />
           <TextInput
-            style={styles.inputStyle}
+            style={
+              !validateEmail || email.length === 0
+                ? styles.inputStyleError
+                : styles.inputStyle
+            }
             onChangeText={(text) => onChangeEmail(text)}
             value={email}
             textContentType="emailAddress"
             placeholder="Email"
           />
           <TextInput
-            style={styles.inputStyle}
+            style={
+              password.length === 0 ? styles.inputStyleError : styles.inputStyle
+            }
             onChangeText={(text) => onChangePassword(text)}
             value={password}
             textContentType="password"
@@ -147,7 +219,11 @@ function RegisterPage({navigation}) {
             secureTextEntry={true}
           />
           <TextInput
-            style={styles.inputStyle}
+            style={
+              !validatePhoneNumber || phoneNum.length === 0
+                ? styles.inputStyleError
+                : styles.inputStyle
+            }
             onChangeText={(text) => onChangePhoneNum(text)}
             value={phoneNum}
             textContentType="telephoneNumber"
@@ -158,7 +234,7 @@ function RegisterPage({navigation}) {
             title="Sign up"
             txtStyle={styles.signUpTxt}
             wrapperStyle={styles.signUpWrapper}
-            onPress={signUp}
+            onPress={() => checkSignUp()}
             isLoading={isLoading}
           />
           <View style={styles.TCWrapper}>
@@ -178,7 +254,7 @@ function RegisterPage({navigation}) {
             />
           </View>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

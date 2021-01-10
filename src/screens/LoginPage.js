@@ -6,7 +6,7 @@ import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import {AuthContext} from '../../context';
-import {storeData, alertMessage, saveFcmToken} from '../utils';
+import {storeData, alertMessage, saveFcmToken, normalize} from '../utils';
 
 const styles = StyleSheet.create({
   container: {
@@ -29,13 +29,27 @@ const styles = StyleSheet.create({
   },
   inputStyle: {
     width: '90%',
-    height: 40,
+    height: normalize(42),
     borderRadius: 20,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: 16,
     paddingHorizontal: 20,
+    paddingVertical: 'auto',
     marginVertical: 10,
     justifyContent: 'center',
+  },
+  inputStyleError: {
+    width: '90%',
+    height: normalize(42),
+    borderRadius: 20,
+    backgroundColor: theme.colors.white,
+    fontSize: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 'auto',
+    marginVertical: 10,
+    justifyContent: 'center',
+    borderColor: theme.colors.red,
+    borderWidth: 1,
   },
   forgotPasswordTxt: {
     color: theme.colors.red,
@@ -48,6 +62,7 @@ const styles = StyleSheet.create({
   loginTxt: {
     color: theme.colors.white,
     fontSize: 18,
+    fontWeight: 'bold',
   },
   loginWrapper: {
     backgroundColor: theme.colors.red,
@@ -57,13 +72,13 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   signUpTxt: {
-    fontSize: 18,
+    fontSize: normalize(16),
     fontWeight: 'bold',
     marginHorizontal: 5,
   },
   signUpBtn: {
     color: theme.colors.red,
-    fontSize: 18,
+    fontSize: normalize(16),
     fontWeight: 'bold',
   },
   signUpWrapper: {
@@ -83,14 +98,26 @@ function LoginPage({navigation}) {
     if (usernameEmail.length === 0 || password.length === 0) {
       alertMessage({
         titleMessage: 'Warning !',
-        bodyMessage: 'all data must be filled',
+        bodyMessage: 'All data must be filled',
         btnText: 'Try Again',
         btnCancel: false,
+      });
+    } else if (!validateEmail) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Email is invalid!',
+        btnText: 'Try Again',
+        btnCancel: true,
       });
     } else {
       login();
     }
   };
+
+  function validateEmail() {
+    var regExp = /\S+@\S+\.\S+/;
+    return regExp.test(usernameEmail);
+  }
 
   async function login() {
     setIsLoading(true);
@@ -135,7 +162,11 @@ function LoginPage({navigation}) {
         <Title txtStyle={styles.txtTitle} text="Log in to your account" />
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.inputStyle}
+            style={
+              !validateEmail || usernameEmail.length === 0
+                ? styles.inputStyleError
+                : styles.inputStyle
+            }
             onChangeText={(text) => onChangeUsernameEmail(text)}
             value={usernameEmail}
             textContentType="emailAddress"
@@ -143,7 +174,9 @@ function LoginPage({navigation}) {
             placeholder="Email"
           />
           <TextInput
-            style={styles.inputStyle}
+            style={
+              password.length === 0 ? styles.inputStyleError : styles.inputStyle
+            }
             onChangeText={(text) => onChangePassword(text)}
             value={password}
             textContentType="password"
@@ -161,7 +194,7 @@ function LoginPage({navigation}) {
             title="Log in"
             txtStyle={styles.loginTxt}
             wrapperStyle={styles.loginWrapper}
-            onPress={validationLogin}
+            onPress={() => validationLogin()}
             isLoading={isLoading}
           />
           <View style={styles.signUpWrapper}>
