@@ -122,7 +122,7 @@ function ChangePassword({navigation}) {
     }
   };
 
-  async function validationPassword() {
+  function validationPassword() {
     if (
       oldPassword.length === 0 ||
       password.length === 0 ||
@@ -134,16 +134,16 @@ function ChangePassword({navigation}) {
         btnText: 'Try Again',
         btnCancel: true,
       });
-    }
-    if (confirmPassword !== password) {
+    } else if (confirmPassword !== password) {
       alertMessage({
         titleMessage: 'Error',
         bodyMessage: 'Password does not match',
         btnText: 'Try Again',
         btnCancel: true,
       });
+    } else {
+      changePassword();
     }
-    await changePassword();
   }
 
   const logout = async () => {
