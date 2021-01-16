@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  RefreshControl,
 } from 'react-native';
 import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
 import axios from 'axios';
@@ -126,6 +127,7 @@ const styles = StyleSheet.create({
 function OrderPage({navigation}) {
   const [isLoadingOngoing, setIsLoadingOngoing] = React.useState(false);
   const [isLoadingPast, setIsLoadingPast] = React.useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
   const [ongoingOrder, setOngoingOrder] = React.useState([]);
   const [pastOrder, setPastOrder] = React.useState([]);
   const [index, setIndex] = React.useState(0);
@@ -134,6 +136,13 @@ function OrderPage({navigation}) {
     {key: 'ongoing', title: 'Ongoing Order'},
     {key: 'past', title: 'Past Order'},
   ]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    getOngoingOrder();
+    getPastOrder();
+    setRefreshing(false);
+  };
 
   const renderStatus = (status) => {
     if (status === 'PROCESSING') {
@@ -314,7 +323,14 @@ function OrderPage({navigation}) {
             </View>
           ) : (
             <React.Fragment>
-              <ScrollView style={styles.innerContainer}>
+              <ScrollView
+                style={styles.innerContainer}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={() => onRefresh()}
+                  />
+                }>
                 <FlatList
                   data={ongoingOrder}
                   renderItem={({item, idx}) => renderOngoingOrder({item, idx})}
@@ -348,7 +364,14 @@ function OrderPage({navigation}) {
               <Text style={styles.titleEmptyOrder}>There is No Past Order</Text>
             </View>
           ) : (
-            <ScrollView style={styles.innerContainer}>
+            <ScrollView
+              style={styles.innerContainer}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={() => onRefresh()}
+                />
+              }>
               <FlatList
                 data={pastOrder}
                 renderItem={({item, idx}) => renderPastOrder({item, idx})}
