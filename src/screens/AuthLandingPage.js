@@ -140,7 +140,7 @@ function AuthLandingPage({navigation}) {
           ...responseData,
           isLogin: true,
         };
-        storeData('guestData', dataGuest);
+        await storeData('guestData', dataGuest);
         saveFcmToken();
         guestIn();
       }

@@ -162,6 +162,20 @@ function OrderPage({navigation}) {
     }
   };
 
+  const renderTime = (dateTime) => {
+    let i = 0;
+    let times = '';
+    let spaces = 0;
+    for (; i < dateTime.length; i++) {
+      if (dateTime[i] === ' ') {
+        spaces++;
+      } else if (spaces === 3) {
+        times += dateTime[i];
+      }
+    }
+    return times;
+  };
+
   const renderPrice = (price) => {
     let i;
     let tempPrice = '';
@@ -203,7 +217,7 @@ function OrderPage({navigation}) {
           <Text style={styles.fcNameStyle} numberOfLines={1}>
             {item.foodcourtName}
           </Text>
-          <Text>{renderDate(item.date)}</Text>
+          <Text>{renderTime(item.date)}</Text>
         </View>
         {item.orderList.map((itm, key) => {
           return (

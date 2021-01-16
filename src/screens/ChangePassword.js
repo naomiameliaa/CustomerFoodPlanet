@@ -12,13 +12,7 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {
-  normalize,
-  getData,
-  removeData,
-  storeData,
-  alertMessage,
-} from '../utils';
+import {normalize, getData, removeData, alertMessage} from '../utils';
 import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
@@ -92,33 +86,14 @@ function ChangePassword({navigation}) {
   const [oldPassword, onChangeOldPassword] = React.useState('');
   const [password, onChangePassword] = React.useState('');
   const [confirmPassword, onChangeConfirmPassword] = React.useState('');
-  const {signOutGuest, signOut} = React.useContext(AuthContext);
+  const {signOut} = React.useContext(AuthContext);
 
   const getDataUser = async () => {
     const dataUser = await getData('userData');
     if (dataUser !== null) {
-      return dataUser;
-    } else {
-      return null;
-    }
-  };
-
-  const getDataGuest = async () => {
-    const dataGuest = await getData('guestData');
-    if (dataGuest !== null) {
-      return dataGuest;
-    } else {
-      return null;
-    }
-  };
-
-  const getUserGuestData = async () => {
-    const dataUser = await getDataUser();
-    const dataGuest = await getDataGuest();
-    if (dataUser !== null) {
       return dataUser.userId;
     } else {
-      return dataGuest.userId;
+      return null;
     }
   };
 
@@ -146,19 +121,36 @@ function ChangePassword({navigation}) {
     }
   }
 
-  const logout = async () => {
-    const dataUser = await getData('userData');
-    const dataGuest = await getData('guestData');
-    if (dataUser !== null) {
-      await removeData('userData');
-      await signOut();
-    } else {
-      const dataGuestUpdated = {
-        ...dataGuest,
-        isLogin: false,
-      };
-      await storeData('guestData', dataGuestUpdated);
-      await signOutGuest(dataGuestUpdated);
+  async function logout() {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        'https://food-planet.herokuapp.com/users/logout',
+      );
+      if (response.data.object === 'Logout success') {
+        alertMessage({
+          titleMessage: 'Success',
+          bodyMessage: 'Logout success!',
+          btnText: 'OK',
+          onPressOK: () => signOutMember(),
+          btnCancel: false,
+        });
+      }
+    } catch (error) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Please try again later',
+        btnText: 'Try Again',
+        btnCancel: false,
+      });
+    }
+    setIsLoading(false);
+  }
+
+  const signOutMember = async () => {
+    const removeLocalData = await removeData('userData');
+    if (removeLocalData) {
+      signOut();
     }
   };
 
@@ -177,7 +169,7 @@ function ChangePassword({navigation}) {
   async function changePassword() {
     setIsLoading(true);
     try {
-      const userId = await getUserGuestData();
+      const userId = await getDataUser();
       const response = await axios.post(
         `https://food-planet.herokuapp.com/users/changePassword?userId=${userId}&oldPassword=${oldPassword}&newPassword=${confirmPassword}`,
       );
@@ -193,10 +185,17 @@ function ChangePassword({navigation}) {
     } catch (error) {
       if (error.response.status === 401) {
         sessionTimedOut();
+      } else if (error.response.msg === 'Wrong password') {
+        alertMessage({
+          titleMessage: 'Failed',
+          bodyMessage: 'Old password not match !',
+          btnText: 'Try Again',
+          btnCancel: true,
+        });
       } else {
         alertMessage({
           titleMessage: 'Failed',
-          bodyMessage: 'Please try again later',
+          bodyMessage: 'Please try again later !',
           btnText: 'Try Again',
           btnCancel: true,
         });

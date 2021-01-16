@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  ScrollView,
   Text,
   View,
   FlatList,
@@ -29,7 +30,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: normalize(30),
-    marginBottom: normalize(80),
     paddingHorizontal: normalize(15),
   },
   boxContainer: {
@@ -341,7 +341,7 @@ function HomePage({navigation}) {
         <Title text="Find your" txtStyle={styles.titleStyle1} />
         <Title text="Food Court" txtStyle={styles.titleStyle2} />
       </View>
-      <View style={styles.scrollVertical}>
+      <ScrollView style={styles.scrollVertical}>
         {isLoading ? (
           <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
         ) : (
@@ -351,7 +351,7 @@ function HomePage({navigation}) {
             keyExtractor={(item) => item.foodcourtId.toString()}
           />
         )}
-      </View>
+      </ScrollView>
       <Modal
         animationType="slide"
         transparent={true}

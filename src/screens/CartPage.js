@@ -23,6 +23,7 @@ import ButtonText from '../components/ButtonText';
 import RadioButton from '../components/RadioButton';
 import theme from '../theme';
 import {AuthContext} from '../../context';
+import {ScrollView} from 'react-native-gesture-handler';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -81,7 +82,7 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.black,
     borderWidth: 1,
     width: 0.12 * SCREEN_WIDTH,
-    height: normalize(20),
+    height: normalize(22),
     paddingHorizontal: 5,
     paddingVertical: 2,
     fontSize: normalize(14),
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.red,
     borderWidth: 1,
     width: 0.12 * SCREEN_WIDTH,
-    height: normalize(20),
+    height: normalize(22),
     paddingHorizontal: 5,
     paddingVertical: 2,
     fontSize: normalize(14),
@@ -381,49 +382,53 @@ function CartPage({navigation}) {
           ) : (
             <View>
               <Title text="My Cart" txtStyle={styles.title} />
-              <FlatList
-                data={cartData.orderList}
-                renderItem={({item, index}) => renderItem({item, index})}
-                keyExtractor={(item) => item.tenantId.toString()}
-              />
-              <View style={styles.horizontalWrapper}>
-                <View style={styles.seatWrapper}>
-                  <Text style={styles.subTitleStyle}>Seat Capacity</Text>
-                  <Text>(max. 10)</Text>
-                </View>
-                <TextInput
-                  style={
-                    seatCapacity > 10 || seatCapacity.length <= 0
-                      ? styles.inputStyleError
-                      : styles.inputStyle
-                  }
-                  onChangeText={(text) => onChangeSeatCapacity(text)}
-                  value={seatCapacity}
-                  textContentType="none"
-                  keyboardType="number-pad"
-                  maxLength={2}
-                  textAlign="right"
+              <ScrollView>
+                <FlatList
+                  data={cartData.orderList}
+                  renderItem={({item, index}) => renderItem({item, index})}
+                  keyExtractor={(item) => item.tenantId.toString()}
                 />
-              </View>
-              <Text style={styles.subTitleStyle}>Payment Method</Text>
-              <RadioButton
-                options={options}
-                onClick={onClickRadio}
-                value={value}
-              />
-              <View style={styles.horizontalWrapper}>
-                <Text style={styles.subTitleStyle}>Total Pay (incl. tax)</Text>
-                <Text style={styles.subTitleStyle}>
-                  {renderPrice(cartData.totalPrice)}
-                </Text>
-              </View>
-              <ButtonText
-                title="Place Order"
-                txtStyle={styles.buttonOrderStyle}
-                wrapperStyle={styles.orderWrapperStyle}
-                isLoading={isLoading}
-                onPress={validationOrder}
-              />
+                <View style={styles.horizontalWrapper}>
+                  <View style={styles.seatWrapper}>
+                    <Text style={styles.subTitleStyle}>Seat Capacity</Text>
+                    <Text>(max. 10)</Text>
+                  </View>
+                  <TextInput
+                    style={
+                      seatCapacity > 10 || seatCapacity.length <= 0
+                        ? styles.inputStyleError
+                        : styles.inputStyle
+                    }
+                    onChangeText={(text) => onChangeSeatCapacity(text)}
+                    value={seatCapacity}
+                    textContentType="none"
+                    keyboardType="number-pad"
+                    maxLength={2}
+                    textAlign="right"
+                  />
+                </View>
+                <Text style={styles.subTitleStyle}>Payment Method</Text>
+                <RadioButton
+                  options={options}
+                  onClick={onClickRadio}
+                  value={value}
+                />
+                <View style={styles.horizontalWrapper}>
+                  <Text style={styles.subTitleStyle}>
+                    Total Pay (incl. tax)
+                  </Text>
+                  <Text style={styles.subTitleStyle}>
+                    {renderPrice(cartData.totalPrice)}
+                  </Text>
+                </View>
+                <ButtonText
+                  title="Place Order"
+                  txtStyle={styles.buttonOrderStyle}
+                  wrapperStyle={styles.orderWrapperStyle}
+                  isLoading={isLoading}
+                  onPress={validationOrder}
+                />
+              </ScrollView>
             </View>
           )}
         </View>

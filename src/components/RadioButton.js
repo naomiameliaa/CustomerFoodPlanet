@@ -38,14 +38,15 @@ export default function RadioButton({options, onClick, value}) {
     <View>
       {options.map((item) => {
         return (
-          <View key={item.key} style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.circle}
-              onPress={() => onClick(item.key)}>
+          <TouchableOpacity
+            key={item.key}
+            style={styles.buttonContainer}
+            onPress={() => onClick(item.key)}>
+            <View style={styles.circle}>
               {value === item.key && <View style={styles.checkedCircle} />}
-            </TouchableOpacity>
+            </View>
             <Text style={styles.txtStyle}>{item.text}</Text>
-          </View>
+          </TouchableOpacity>
         );
       })}
     </View>

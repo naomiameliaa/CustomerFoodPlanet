@@ -31,6 +31,9 @@ const styles = StyleSheet.create({
     paddingVertical: normalize(25),
     paddingHorizontal: normalize(25),
   },
+  spinner: {
+    marginTop: 80,
+  },
   profileWrapper: {
     flexDirection: 'row',
     padding: 20,
@@ -151,7 +154,6 @@ function ProfilePage({navigation}) {
   const [dataUserGuest, setDataUserGuest] = React.useState([]);
   const [isLoadingLogin, setIsLoadingLogin] = React.useState(false);
   const [isLoadingLogout, setisLoadingLogout] = React.useState(false);
-  const [isLoadingQuery, setIsLoadingQuery] = React.useState(false);
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
   const getDataUser = async () => {
@@ -174,17 +176,26 @@ function ProfilePage({navigation}) {
 
   const checkUserGuest = async () => {
     const dataUser = await getDataUser();
+    if (dataUser !== null) {
+      return 'member';
+    } else {
+      return 'guest';
+    }
+  };
+
+  const logoutUserGuest = async () => {
+    const dataUser = await getDataUser();
     const dataGuest = await getDataGuest();
     if (dataUser !== null) {
       await removeData('userData');
-      return 'member';
+      signOut();
     } else {
       const dataGuestUpdated = {
         ...dataGuest,
         isLogin: false,
       };
-      storeData('guestData', dataGuestUpdated);
-      return 'guest';
+      await storeData('guestData', dataGuestUpdated);
+      signOutGuest(dataGuest);
     }
   };
 
@@ -198,15 +209,25 @@ function ProfilePage({navigation}) {
     }
   };
 
+  async function getUserGuestProfile() {
+    setIsLoadingLogin(true);
+    await getProfile();
+    await getUserGuestData();
+    setIsLoadingLogin(false);
+  }
+
   async function getUserGuestData() {
-    setIsLoadingQuery(true);
     const userId = await getUserId();
+    const typeUser = await checkUserGuest();
     try {
       const response = await axios.get(
         `https://food-planet.herokuapp.com/users/searchById?userId=${userId}`,
       );
       if (response.data.msg === 'Query success') {
-        storeData('userData', response.data.object);
+        await storeData(
+          typeUser === 'member' ? 'userData' : 'guestData',
+          response.data.object,
+        );
         setDataUserGuest(response.data.object);
       }
     } catch (error) {
@@ -214,15 +235,7 @@ function ProfilePage({navigation}) {
         sessionTimedOut();
       }
     }
-    setIsLoadingQuery(false);
   }
-
-  const signOutMember = async () => {
-    const removeLocalData = await removeData('userData');
-    if (removeLocalData) {
-      signOut();
-    }
-  };
 
   async function logout() {
     setisLoadingLogout(true);
@@ -231,14 +244,11 @@ function ProfilePage({navigation}) {
         'https://food-planet.herokuapp.com/users/logout',
       );
       if (response.data.object === 'Logout success') {
-        const checkUSER = await checkUserGuest();
-        const checkGUEST = await getDataGuest();
         alertMessage({
           titleMessage: 'Success',
           bodyMessage: 'Logout success!',
           btnText: 'OK',
-          onPressOK: () =>
-            checkUSER === 'member' ? signOutMember() : signOutGuest(checkGUEST),
+          onPressOK: () => logoutUserGuest(),
           btnCancel: false,
         });
       }
@@ -258,17 +268,12 @@ function ProfilePage({navigation}) {
       titleMessage: 'Session Timeout',
       bodyMessage: 'Please re-login',
       btnText: 'OK',
-      onPressOK: () => {
-        checkUserGuest() === 'member'
-          ? signOutMember()
-          : signOutGuest(checkUserGuest());
-      },
+      onPressOK: () => logoutUserGuest(),
       btnCancel: false,
     });
   }
 
   async function getProfile() {
-    setIsLoadingLogin(true);
     const userId = await getUserId();
     try {
       const response = await axios.get(
@@ -282,7 +287,6 @@ function ProfilePage({navigation}) {
         sessionTimedOut();
       }
     }
-    setIsLoadingLogin(false);
   }
 
   const renderPrice = (price) => {
@@ -312,8 +316,7 @@ function ProfilePage({navigation}) {
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      getProfile();
-      getUserGuestData();
+      getUserGuestProfile();
     });
     return unsubscribe;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -322,50 +325,46 @@ function ProfilePage({navigation}) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <View style={styles.profileWrapper}>
-          <Image
-            style={styles.profileImg}
-            source={require('../assets/profile-user.png')}
-          />
-          {isLoadingLogin ? (
-            <SpinnerKit sizeSpinner="large" />
-          ) : (
-            <View style={styles.identityWrapper}>
-              <Text style={styles.identityName} numberOfLines={1}>
-                {dataProfile.fullname ? dataProfile.fullname : 'Guest'}
-              </Text>
-              <Text style={styles.numEmailIdentity}>
-                {dataProfile.phoneNumber}
-              </Text>
-              <Text style={styles.numEmailIdentity} numberOfLines={1}>
-                {dataUserGuest.email}
-              </Text>
-            </View>
-          )}
-          <View style={styles.editBtnWrapper}>
-            <ButtonKit
-              btnStyle={
-                dataUserGuest.isGuest
-                  ? styles.editButtonDisabled
-                  : styles.editButton
-              }
-              source={require('../assets/edit.png')}
-              onPress={() =>
-                navigation.navigate('Edit Profile', {
-                  full_name: dataProfile.fullname,
-                  phone_num: dataProfile.phoneNumber,
-                  getProfile: getProfile,
-                })
-              }
-              disabled={dataUserGuest.isGuest ? true : false}
-            />
-          </View>
-        </View>
-        {dataUserGuest?.balance !== null && dataUserGuest?.point !== null && (
+        {isLoadingLogin ? (
+          <SpinnerKit sizeSpinner="large" style={styles.spinner} />
+        ) : (
           <>
-            {isLoadingQuery ? (
-              <SpinnerKit sizeSpinner="large" />
-            ) : (
+            <View style={styles.profileWrapper}>
+              <Image
+                style={styles.profileImg}
+                source={require('../assets/profile-user.png')}
+              />
+              <View style={styles.identityWrapper}>
+                <Text style={styles.identityName} numberOfLines={1}>
+                  {dataProfile.fullname ? dataProfile.fullname : 'Guest'}
+                </Text>
+                <Text style={styles.numEmailIdentity}>
+                  {dataProfile.phoneNumber}
+                </Text>
+                <Text style={styles.numEmailIdentity} numberOfLines={1}>
+                  {dataUserGuest.email}
+                </Text>
+              </View>
+              <View style={styles.editBtnWrapper}>
+                <ButtonKit
+                  btnStyle={
+                    dataUserGuest.isGuest
+                      ? styles.editButtonDisabled
+                      : styles.editButton
+                  }
+                  source={require('../assets/edit.png')}
+                  onPress={() =>
+                    navigation.navigate('Edit Profile', {
+                      full_name: dataProfile.fullname,
+                      phone_num: dataProfile.phoneNumber,
+                      getProfile: getProfile,
+                    })
+                  }
+                  disabled={dataUserGuest.isGuest ? true : false}
+                />
+              </View>
+            </View>
+            {dataUserGuest?.balance !== null && dataUserGuest?.point !== null && (
               <View style={styles.walletPointContainer}>
                 <View style={styles.walletWrapper}>
                   <Image
@@ -387,78 +386,78 @@ function ProfilePage({navigation}) {
                 </View>
               </View>
             )}
+            <View style={styles.btnContainer}>
+              {dataUserGuest.isGuest && (
+                <TouchableOpacity
+                  style={styles.btnWrapper}
+                  onPress={() => navigation.navigate('Register Member')}>
+                  <Text style={styles.buttonTxt}>Register as Member</Text>
+                  <Image
+                    style={styles.nextButton}
+                    source={require('../assets/next-button.png')}
+                  />
+                </TouchableOpacity>
+              )}
+              {!dataUserGuest.isGuest && (
+                <TouchableOpacity
+                  style={styles.btnWrapper}
+                  onPress={() => navigation.navigate('Change Email')}>
+                  <Text style={styles.buttonTxt}>Change Email</Text>
+                  <Image
+                    style={styles.nextButton}
+                    source={require('../assets/next-button.png')}
+                  />
+                </TouchableOpacity>
+              )}
+              {!dataUserGuest.isGuest && (
+                <TouchableOpacity
+                  style={styles.btnWrapper}
+                  onPress={() => navigation.navigate('Change Password')}>
+                  <Text style={styles.buttonTxt}>Change Password</Text>
+                  <Image
+                    style={styles.nextButton}
+                    source={require('../assets/next-button.png')}
+                  />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity style={styles.btnWrapper}>
+                <Text style={styles.buttonTxt}>Payment Method</Text>
+                <Image
+                  style={styles.nextButton}
+                  source={require('../assets/next-button.png')}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.btnWrapper}>
+                <Text style={styles.buttonTxt}>About Us</Text>
+                <Image
+                  style={styles.nextButton}
+                  source={require('../assets/next-button.png')}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.btnWrapper}>
+                <Text style={styles.buttonTxt}>Settings</Text>
+                <Image
+                  style={styles.nextButton}
+                  source={require('../assets/next-button.png')}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.btnWrapper}>
+                <Text style={styles.buttonTxt}>Support Centre</Text>
+                <Image
+                  style={styles.nextButton}
+                  source={require('../assets/next-button.png')}
+                />
+              </TouchableOpacity>
+              <ButtonText
+                title="Log out"
+                onPress={() => logout()}
+                txtStyle={styles.logoutBtn}
+                wrapperStyle={styles.logoutBtnWrapper}
+                isLoading={isLoadingLogout}
+              />
+            </View>
           </>
         )}
-        <View style={styles.btnContainer}>
-          {dataUserGuest.isGuest && (
-            <TouchableOpacity
-              style={styles.btnWrapper}
-              onPress={() => navigation.navigate('Register Member')}>
-              <Text style={styles.buttonTxt}>Register as Member</Text>
-              <Image
-                style={styles.nextButton}
-                source={require('../assets/next-button.png')}
-              />
-            </TouchableOpacity>
-          )}
-          {!dataUserGuest.isGuest && (
-            <TouchableOpacity
-              style={styles.btnWrapper}
-              onPress={() => navigation.navigate('Change Email')}>
-              <Text style={styles.buttonTxt}>Change Email</Text>
-              <Image
-                style={styles.nextButton}
-                source={require('../assets/next-button.png')}
-              />
-            </TouchableOpacity>
-          )}
-          {!dataUserGuest.isGuest && (
-            <TouchableOpacity
-              style={styles.btnWrapper}
-              onPress={() => navigation.navigate('Change Password')}>
-              <Text style={styles.buttonTxt}>Change Password</Text>
-              <Image
-                style={styles.nextButton}
-                source={require('../assets/next-button.png')}
-              />
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity style={styles.btnWrapper}>
-            <Text style={styles.buttonTxt}>Payment Method</Text>
-            <Image
-              style={styles.nextButton}
-              source={require('../assets/next-button.png')}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btnWrapper}>
-            <Text style={styles.buttonTxt}>About Us</Text>
-            <Image
-              style={styles.nextButton}
-              source={require('../assets/next-button.png')}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btnWrapper}>
-            <Text style={styles.buttonTxt}>Settings</Text>
-            <Image
-              style={styles.nextButton}
-              source={require('../assets/next-button.png')}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btnWrapper}>
-            <Text style={styles.buttonTxt}>Support Centre</Text>
-            <Image
-              style={styles.nextButton}
-              source={require('../assets/next-button.png')}
-            />
-          </TouchableOpacity>
-          <ButtonText
-            title="Log out"
-            onPress={() => logout()}
-            txtStyle={styles.logoutBtn}
-            wrapperStyle={styles.logoutBtnWrapper}
-            isLoading={isLoadingLogout}
-          />
-        </View>
       </ScrollView>
     </SafeAreaView>
   );

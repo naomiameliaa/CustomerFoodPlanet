@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  ScrollView,
   Text,
   View,
   SafeAreaView,
@@ -382,54 +383,56 @@ function DetailMenu({route, navigation}) {
         source={require('../assets/back-button.png')}
         onPress={() => navigation.goBack()}
       />
-      <Image
-        source={{uri: `data:image/jpeg;base64,${menuImage}`}}
-        style={styles.imageStyle}
-        resizeMode="cover"
-      />
-      <View style={styles.contentWrapper}>
-        <View style={styles.namePriceWrapper}>
-          <Text style={styles.nameStyle} numberOfLines={1}>
-            {menuName}
+      <ScrollView>
+        <Image
+          source={{uri: `data:image/jpeg;base64,${menuImage}`}}
+          style={styles.imageStyle}
+          resizeMode="cover"
+        />
+        <View style={styles.contentWrapper}>
+          <View style={styles.namePriceWrapper}>
+            <Text style={styles.nameStyle} numberOfLines={1}>
+              {menuName}
+            </Text>
+            <Text style={styles.priceStyle}>{renderPrice(menuPrice)}</Text>
+          </View>
+          <Text style={styles.descStyle} numberOfLines={3}>
+            {menuDescription}
           </Text>
-          <Text style={styles.priceStyle}>{renderPrice(menuPrice)}</Text>
-        </View>
-        <Text style={styles.descStyle} numberOfLines={3}>
-          {menuDescription}
-        </Text>
-        <View style={styles.instructOptionalWrapper}>
-          <Text style={styles.instructionStyle}>Special Instruction</Text>
-          <Text style={styles.optionalStyle}>Optional</Text>
-        </View>
-        <TextInput
-          style={styles.inputStyle}
-          onChangeText={(text) => onChangeNotes(text)}
-          value={notes}
-          textContentType="none"
-          placeholder="E.g. No Chili, please"
-        />
-        <View style={styles.plusMinWrapper}>
-          <ButtonKit
-            wrapperStyle={styles.plusMinStyle}
-            source={require('../assets/minus-button.png')}
-            onPress={checkMinus}
-            disabled={qty === 0 ? true : false}
+          <View style={styles.instructOptionalWrapper}>
+            <Text style={styles.instructionStyle}>Special Instruction</Text>
+            <Text style={styles.optionalStyle}>Optional</Text>
+          </View>
+          <TextInput
+            style={styles.inputStyle}
+            onChangeText={(text) => onChangeNotes(text)}
+            value={notes}
+            textContentType="none"
+            placeholder="E.g. No Chili, please"
           />
-          <Text style={styles.quantityStyle}>{qty}</Text>
-          <ButtonKit
-            wrapperStyle={styles.plusMinStyle}
-            source={require('../assets/plus-button.png')}
-            onPress={() => setQty(qty + 1)}
+          <View style={styles.plusMinWrapper}>
+            <ButtonKit
+              wrapperStyle={styles.plusMinStyle}
+              source={require('../assets/minus-button.png')}
+              onPress={checkMinus}
+              disabled={qty === 0 ? true : false}
+            />
+            <Text style={styles.quantityStyle}>{qty}</Text>
+            <ButtonKit
+              wrapperStyle={styles.plusMinStyle}
+              source={require('../assets/plus-button.png')}
+              onPress={() => setQty(qty + 1)}
+            />
+          </View>
+          <ButtonText
+            title={qty > 0 ? checkEditAdd() : 'Remove'}
+            txtStyle={styles.buttonTxtStyle}
+            wrapperStyle={styles.btnWrapperStyle}
+            onPress={qty > 0 ? editOrAdd : removeFromCart}
+            isLoading={isLoading}
           />
         </View>
-        <ButtonText
-          title={qty > 0 ? checkEditAdd() : 'Remove'}
-          txtStyle={styles.buttonTxtStyle}
-          wrapperStyle={styles.btnWrapperStyle}
-          onPress={qty > 0 ? editOrAdd : removeFromCart}
-          isLoading={isLoading}
-        />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
