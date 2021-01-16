@@ -415,13 +415,14 @@ function DetailMenu({route, navigation}) {
               wrapperStyle={styles.plusMinStyle}
               source={require('../assets/minus-button.png')}
               onPress={checkMinus}
-              disabled={qty === 0 ? true : false}
+              disabled={qty === 0 || isLoading ? true : false}
             />
             <Text style={styles.quantityStyle}>{qty}</Text>
             <ButtonKit
               wrapperStyle={styles.plusMinStyle}
               source={require('../assets/plus-button.png')}
               onPress={() => setQty(qty + 1)}
+              disabled={isLoading}
             />
           </View>
           <ButtonText
