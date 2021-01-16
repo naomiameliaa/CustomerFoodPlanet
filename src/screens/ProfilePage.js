@@ -44,6 +44,12 @@ const styles = StyleSheet.create({
     height: 80,
     marginRight: normalize(25),
   },
+  profileImgBig: {
+    width: 150,
+    height: 150,
+    marginHorizontal: normalize(10),
+    alignSelf: 'center',
+  },
   identityWrapper: {
     flex: 1,
     flexDirection: 'column',
@@ -135,17 +141,32 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: normalize(15),
   },
+  buttonTxtRegister: {
+    fontWeight: 'bold',
+    fontSize: normalize(16),
+    textAlign: 'center',
+    color: theme.colors.red,
+    marginVertical: normalize(10),
+  },
   logoutBtnWrapper: {
     backgroundColor: theme.colors.red,
     width: SCREEN_WIDTH * 0.7,
     borderRadius: 20,
     paddingVertical: 12,
-    marginTop: normalize(12),
+    alignSelf: 'center',
+    marginTop: 50,
   },
   logoutBtn: {
     fontSize: normalize(18),
     fontWeight: 'bold',
     color: theme.colors.white,
+  },
+  joinUsText: {
+    color: theme.colors.red,
+    fontWeight: 'bold',
+    fontSize: normalize(20),
+    textAlign: 'center',
+    marginBottom: normalize(50),
   },
 });
 
@@ -324,138 +345,117 @@ function ProfilePage({navigation}) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView style={styles.innerContainer}>
         {isLoadingLogin ? (
           <SpinnerKit sizeSpinner="large" style={styles.spinner} />
         ) : (
           <>
-            <View style={styles.profileWrapper}>
-              <Image
-                style={styles.profileImg}
-                source={require('../assets/profile-user.png')}
-              />
-              <View style={styles.identityWrapper}>
-                <Text style={styles.identityName} numberOfLines={1}>
-                  {dataProfile.fullname ? dataProfile.fullname : 'Guest'}
+            {dataUserGuest.isGuest ? (
+              <>
+                <Text style={styles.joinUsText}>
+                  Join us for more features !
                 </Text>
-                <Text style={styles.numEmailIdentity}>
-                  {dataProfile.phoneNumber}
-                </Text>
-                <Text style={styles.numEmailIdentity} numberOfLines={1}>
-                  {dataUserGuest.email}
-                </Text>
-              </View>
-              <View style={styles.editBtnWrapper}>
-                <ButtonKit
-                  btnStyle={
-                    dataUserGuest.isGuest
-                      ? styles.editButtonDisabled
-                      : styles.editButton
-                  }
-                  source={require('../assets/edit.png')}
-                  onPress={() =>
-                    navigation.navigate('Edit Profile', {
-                      full_name: dataProfile.fullname,
-                      phone_num: dataProfile.phoneNumber,
-                      getProfile: getProfile,
-                    })
-                  }
-                  disabled={dataUserGuest.isGuest ? true : false}
-                />
-              </View>
-            </View>
-            {dataUserGuest?.balance !== null && dataUserGuest?.point !== null && (
-              <View style={styles.walletPointContainer}>
-                <View style={styles.walletWrapper}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Register Member')}>
                   <Image
-                    style={styles.walletStyle}
-                    source={require('../assets/wallet.png')}
+                    style={styles.profileImgBig}
+                    source={require('../assets/profile-user.png')}
                   />
-                  <View style={styles.txtWalletWrapper}>
-                    <Text style={styles.txtWallet}>Rp</Text>
-                    <Text style={styles.nominalWallet}>
-                      {renderPrice(dataUserGuest.balance)}
+                  <Text style={styles.buttonTxtRegister}>
+                    Register as Member
+                  </Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <View style={styles.profileWrapper}>
+                  <Image
+                    style={styles.profileImg}
+                    source={require('../assets/profile-user.png')}
+                  />
+                  <View style={styles.identityWrapper}>
+                    <Text style={styles.identityName} numberOfLines={1}>
+                      {dataProfile.fullname ? dataProfile.fullname : 'Guest'}
+                    </Text>
+                    <Text style={styles.numEmailIdentity}>
+                      {dataProfile.phoneNumber}
+                    </Text>
+                    <Text style={styles.numEmailIdentity} numberOfLines={1}>
+                      {dataUserGuest.email}
                     </Text>
                   </View>
+                  <View style={styles.editBtnWrapper}>
+                    <ButtonKit
+                      btnStyle={
+                        dataUserGuest.isGuest
+                          ? styles.editButtonDisabled
+                          : styles.editButton
+                      }
+                      source={require('../assets/edit.png')}
+                      onPress={() =>
+                        navigation.navigate('Edit Profile', {
+                          full_name: dataProfile.fullname,
+                          phone_num: dataProfile.phoneNumber,
+                          getProfile: getProfile,
+                        })
+                      }
+                      disabled={dataUserGuest.isGuest ? true : false}
+                    />
+                  </View>
                 </View>
-                <View style={styles.pointWrapper}>
-                  <Text style={styles.nominalPoint}>
-                    {renderPrice(dataUserGuest.point)}
-                  </Text>
-                  <Text style={styles.txtPoint}>points</Text>
+                {dataUserGuest?.balance !== null &&
+                  dataUserGuest?.point !== null && (
+                    <View style={styles.walletPointContainer}>
+                      <View style={styles.walletWrapper}>
+                        <Image
+                          style={styles.walletStyle}
+                          source={require('../assets/wallet.png')}
+                        />
+                        <View style={styles.txtWalletWrapper}>
+                          <Text style={styles.txtWallet}>Rp</Text>
+                          <Text style={styles.nominalWallet}>
+                            {renderPrice(dataUserGuest.balance)}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.pointWrapper}>
+                        <Text style={styles.nominalPoint}>
+                          {renderPrice(dataUserGuest.point)}
+                        </Text>
+                        <Text style={styles.txtPoint}>points</Text>
+                      </View>
+                    </View>
+                  )}
+                <View style={styles.btnContainer}>
+                  <TouchableOpacity
+                    style={styles.btnWrapper}
+                    onPress={() => navigation.navigate('Change Email')}>
+                    <Text style={styles.buttonTxt}>Change Email</Text>
+                    <Image
+                      style={styles.nextButton}
+                      source={require('../assets/next-button.png')}
+                    />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.btnWrapper}
+                    onPress={() => navigation.navigate('Change Password')}>
+                    <Text style={styles.buttonTxt}>Change Password</Text>
+                    <Image
+                      style={styles.nextButton}
+                      source={require('../assets/next-button.png')}
+                    />
+                  </TouchableOpacity>
                 </View>
-              </View>
+              </>
             )}
-            <View style={styles.btnContainer}>
-              {dataUserGuest.isGuest && (
-                <TouchableOpacity
-                  style={styles.btnWrapper}
-                  onPress={() => navigation.navigate('Register Member')}>
-                  <Text style={styles.buttonTxt}>Register as Member</Text>
-                  <Image
-                    style={styles.nextButton}
-                    source={require('../assets/next-button.png')}
-                  />
-                </TouchableOpacity>
-              )}
-              {!dataUserGuest.isGuest && (
-                <TouchableOpacity
-                  style={styles.btnWrapper}
-                  onPress={() => navigation.navigate('Change Email')}>
-                  <Text style={styles.buttonTxt}>Change Email</Text>
-                  <Image
-                    style={styles.nextButton}
-                    source={require('../assets/next-button.png')}
-                  />
-                </TouchableOpacity>
-              )}
-              {!dataUserGuest.isGuest && (
-                <TouchableOpacity
-                  style={styles.btnWrapper}
-                  onPress={() => navigation.navigate('Change Password')}>
-                  <Text style={styles.buttonTxt}>Change Password</Text>
-                  <Image
-                    style={styles.nextButton}
-                    source={require('../assets/next-button.png')}
-                  />
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity style={styles.btnWrapper}>
-                <Text style={styles.buttonTxt}>Payment Method</Text>
-                <Image
-                  style={styles.nextButton}
-                  source={require('../assets/next-button.png')}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.btnWrapper}>
-                <Text style={styles.buttonTxt}>About Us</Text>
-                <Image
-                  style={styles.nextButton}
-                  source={require('../assets/next-button.png')}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.btnWrapper}>
-                <Text style={styles.buttonTxt}>Settings</Text>
-                <Image
-                  style={styles.nextButton}
-                  source={require('../assets/next-button.png')}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.btnWrapper}>
-                <Text style={styles.buttonTxt}>Support Centre</Text>
-                <Image
-                  style={styles.nextButton}
-                  source={require('../assets/next-button.png')}
-                />
-              </TouchableOpacity>
-              <ButtonText
-                title="Log out"
-                onPress={() => logout()}
-                txtStyle={styles.logoutBtn}
-                wrapperStyle={styles.logoutBtnWrapper}
-                isLoading={isLoadingLogout}
-              />
-            </View>
+            <ButtonText
+              title="Log out"
+              onPress={() => logout()}
+              txtStyle={styles.logoutBtn}
+              wrapperStyle={styles.logoutBtnWrapper}
+              isLoading={isLoadingLogout}
+            />
           </>
         )}
       </ScrollView>

@@ -2,6 +2,7 @@ export default {
   colors: {
     red: '#C84127',
     red_20: 'rgba(200,65,39,0.2)',
+    red_80: 'rgba(200,65,39,0.8)',
     off_white: '#FEFEFE',
     white: '#FFFFFF',
     white_20: 'rgba(255,255,255,0.2)',
