@@ -39,6 +39,11 @@ const styles = StyleSheet.create({
     height: 290,
     marginBottom: normalize(10),
   },
+  boxContainerDisabled: {
+    height: 290,
+    marginBottom: normalize(10),
+    opacity: 0.5,
+  },
   scrollVertical: {
     width: '100%',
   },
@@ -274,7 +279,7 @@ function HomePage({navigation}) {
     }
     return (
       <TouchableOpacity
-        style={styles.boxContainer}
+        style={!statusOpen ? styles.boxContainerDisabled : styles.boxContainer}
         onPress={() => {
           navigation.navigate('List Tenant', {
             foodcourtId: item.foodcourtId,

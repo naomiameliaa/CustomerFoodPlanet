@@ -100,6 +100,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderColor: theme.colors.grey,
   },
+  plusMinStyleDisabled: {
+    width: 30,
+    height: 30,
+    marginHorizontal: 15,
+    padding: 8,
+    borderWidth: 0.5,
+    borderRadius: 8,
+    borderColor: theme.colors.grey,
+    opacity: 0.2,
+  },
   quantityStyle: {
     fontSize: normalize(20),
     fontWeight: 'bold',
@@ -406,7 +416,11 @@ function DetailMenu({route, navigation}) {
           />
           <View style={styles.plusMinWrapper}>
             <ButtonKit
-              wrapperStyle={styles.plusMinStyle}
+              wrapperStyle={
+                qty === 0 || isLoading || (!isEdit && qty === 1)
+                  ? styles.plusMinStyleDisabled
+                  : styles.plusMinStyle
+              }
               source={require('../assets/minus-button.png')}
               onPress={() => setQty(qty - 1)}
               disabled={
@@ -415,7 +429,11 @@ function DetailMenu({route, navigation}) {
             />
             <Text style={styles.quantityStyle}>{qty}</Text>
             <ButtonKit
-              wrapperStyle={styles.plusMinStyle}
+              wrapperStyle={
+                isLoading || qty === 99
+                  ? styles.plusMinStyleDisabled
+                  : styles.plusMinStyle
+              }
               source={require('../assets/plus-button.png')}
               onPress={() => setQty(qty + 1)}
               disabled={isLoading || qty === 99 ? true : false}
