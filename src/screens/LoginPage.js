@@ -139,12 +139,14 @@ function LoginPage({navigation}) {
       }
     } catch (error) {
       console.log(error);
-      alertMessage({
-        titleMessage: 'Error',
-        bodyMessage: 'Incorrect password or email',
-        btnText: 'Try Again',
-        btnCancel: false,
-      });
+      if (error.response.status === 400) {
+        alertMessage({
+          titleMessage: 'Error',
+          bodyMessage: error.response.data.message,
+          btnText: 'Try Again',
+          btnCancel: false,
+        });
+      }
     }
     setIsLoading(false);
   }
