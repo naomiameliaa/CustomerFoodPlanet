@@ -33,6 +33,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: normalize(15),
   },
   containerModalVisible: {
+    flex: 1,
+    marginTop: normalize(30),
+    paddingHorizontal: normalize(15),
     opacity: 0.2,
   },
   boxContainer: {
@@ -344,24 +347,23 @@ function HomePage({navigation}) {
   }, [navigation]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={modalVisible && styles.containerModalVisible}>
-        <View style={styles.titleContainer}>
-          <Title text="Find your" txtStyle={styles.titleStyle1} />
-          <Title text="Food Court" txtStyle={styles.titleStyle2} />
-        </View>
-        <ScrollView style={styles.scrollVertical}>
-          {isLoading ? (
-            <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
-          ) : (
-            <FlatList
-              data={listFoodCourt}
-              renderItem={({item, index}) => renderItem({item, index})}
-              keyExtractor={(item) => item.foodcourtId.toString()}
-            />
-          )}
-        </ScrollView>
+    <SafeAreaView
+      style={modalVisible ? styles.containerModalVisible : styles.container}>
+      <View style={styles.titleContainer}>
+        <Title text="Find your" txtStyle={styles.titleStyle1} />
+        <Title text="Food Court" txtStyle={styles.titleStyle2} />
       </View>
+      <ScrollView style={styles.scrollVertical}>
+        {isLoading ? (
+          <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
+        ) : (
+          <FlatList
+            data={listFoodCourt}
+            renderItem={({item, index}) => renderItem({item, index})}
+            keyExtractor={(item) => item.foodcourtId.toString()}
+          />
+        )}
+      </ScrollView>
       <Modal
         animationType="slide"
         transparent={true}
