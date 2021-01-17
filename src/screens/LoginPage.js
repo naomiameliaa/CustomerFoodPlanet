@@ -127,9 +127,7 @@ function LoginPage({navigation}) {
         {
           params: {
             role: 'customer',
-          },
-          auth: {
-            username: usernameEmail.toLowerCase(),
+            email: usernameEmail.toLowerCase(),
             password: password,
           },
         },

@@ -127,9 +127,7 @@ function AuthLandingPage({navigation}) {
         {
           params: {
             role: 'customer',
-          },
-          auth: {
-            username: guestData.email.toLowerCase(),
+            email: guestData.email.toLowerCase(),
             password: guestData.password,
           },
         },
