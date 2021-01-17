@@ -134,12 +134,6 @@ function DetailMenu({route, navigation}) {
     tenantId,
   } = route.params;
 
-  function checkMinus() {
-    if (qty > 0) {
-      setQty(qty - 1);
-    }
-  }
-
   const logout = async () => {
     const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
@@ -414,15 +408,17 @@ function DetailMenu({route, navigation}) {
             <ButtonKit
               wrapperStyle={styles.plusMinStyle}
               source={require('../assets/minus-button.png')}
-              onPress={checkMinus}
-              disabled={qty === 0 || isLoading ? true : false}
+              onPress={() => setQty(qty - 1)}
+              disabled={
+                qty === 0 || isLoading || (!isEdit && qty === 1) ? true : false
+              }
             />
             <Text style={styles.quantityStyle}>{qty}</Text>
             <ButtonKit
               wrapperStyle={styles.plusMinStyle}
               source={require('../assets/plus-button.png')}
               onPress={() => setQty(qty + 1)}
-              disabled={isLoading}
+              disabled={isLoading || qty === 99 ? true : false}
             />
           </View>
           <ButtonText

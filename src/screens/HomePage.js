@@ -32,6 +32,9 @@ const styles = StyleSheet.create({
     marginTop: normalize(30),
     paddingHorizontal: normalize(15),
   },
+  containerModalVisible: {
+    opacity: 0.2,
+  },
   boxContainer: {
     height: 290,
     marginBottom: normalize(10),
@@ -317,7 +320,7 @@ function HomePage({navigation}) {
           />
         </View>
         <ButtonText
-          title="Check Availability Seats"
+          title="Check Available Seats"
           txtStyle={styles.buttonTxtStyle}
           wrapperStyle={styles.btnWrapperStyle}
           onPress={() => checkAvailableSeat(item.foodcourtId)}
@@ -337,21 +340,23 @@ function HomePage({navigation}) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Title text="Find your" txtStyle={styles.titleStyle1} />
-        <Title text="Food Court" txtStyle={styles.titleStyle2} />
+      <View style={modalVisible && styles.containerModalVisible}>
+        <View style={styles.titleContainer}>
+          <Title text="Find your" txtStyle={styles.titleStyle1} />
+          <Title text="Food Court" txtStyle={styles.titleStyle2} />
+        </View>
+        <ScrollView style={styles.scrollVertical}>
+          {isLoading ? (
+            <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
+          ) : (
+            <FlatList
+              data={listFoodCourt}
+              renderItem={({item, index}) => renderItem({item, index})}
+              keyExtractor={(item) => item.foodcourtId.toString()}
+            />
+          )}
+        </ScrollView>
       </View>
-      <ScrollView style={styles.scrollVertical}>
-        {isLoading ? (
-          <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
-        ) : (
-          <FlatList
-            data={listFoodCourt}
-            renderItem={({item, index}) => renderItem({item, index})}
-            keyExtractor={(item) => item.foodcourtId.toString()}
-          />
-        )}
-      </ScrollView>
       <Modal
         animationType="slide"
         transparent={true}
