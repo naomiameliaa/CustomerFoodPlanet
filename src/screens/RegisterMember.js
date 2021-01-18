@@ -167,6 +167,7 @@ function RegisterMember({navigation}) {
   };
 
   const updateData = async () => {
+    await logoutGuest();
     await removeData('guestData');
     await signOutGuest(null);
   };
@@ -199,10 +200,26 @@ function RegisterMember({navigation}) {
     });
   }
 
-  async function registerAsMember() {
+  async function logoutGuest() {
     setIsLoading(true);
     try {
-      const userId = await getUserGuestData();
+      const response = await axios.post(
+        'https://food-planet.herokuapp.com/users/logout',
+      );
+    } catch(error) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Please try again later!',
+        btnText: 'Try Again',
+        btnCancel: false,
+      });
+    }
+  }
+
+  async function registerAsMember() {
+    setIsLoading(true);
+    const userId = await getUserGuestData();
+    try {
       const response = await axios.post(
         'https://food-planet.herokuapp.com/users/registerMember',
         {
