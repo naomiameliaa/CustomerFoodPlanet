@@ -167,9 +167,9 @@ function RegisterMember({navigation}) {
   };
 
   const updateData = async () => {
-    await logoutGuest();
     await removeData('guestData');
-    await signOutGuest(null);
+    await signOutGuest(false);
+    await logoutGuest();
   };
 
   const logout = async () => {

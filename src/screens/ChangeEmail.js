@@ -145,7 +145,25 @@ function ChangeEmail({navigation}) {
     }
   };
 
-  const logout = async () => {
+  async function logout() {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        'https://food-planet.herokuapp.com/users/logout',
+      );
+      await signOutUser();
+    } catch (error) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Please try again later',
+        btnText: 'Try Again',
+        btnCancel: false,
+      });
+    }
+    setIsLoading(false);
+  }
+
+  const signOutUser = async () => {
     const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
     if (dataUser !== null) {
@@ -167,7 +185,7 @@ function ChangeEmail({navigation}) {
       bodyMessage: 'Please re-login',
       btnText: 'OK',
       onPressOK: () => {
-        logout();
+        signOutUser();
       },
       btnCancel: false,
     });

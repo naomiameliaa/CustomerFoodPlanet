@@ -127,15 +127,7 @@ function ChangePassword({navigation}) {
       const response = await axios.post(
         'https://food-planet.herokuapp.com/users/logout',
       );
-      if (response.data.object === 'Logout success') {
-        alertMessage({
-          titleMessage: 'Success',
-          bodyMessage: 'Logout success!',
-          btnText: 'OK',
-          onPressOK: () => signOutMember(),
-          btnCancel: false,
-        });
-      }
+      await signOutMember();
     } catch (error) {
       alertMessage({
         titleMessage: 'Error',
