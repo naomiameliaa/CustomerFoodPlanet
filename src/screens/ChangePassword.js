@@ -185,7 +185,7 @@ function ChangePassword({navigation}) {
     } catch (error) {
       if (error.response.status === 401) {
         sessionTimedOut();
-      } else if (error.response.msg === 'Wrong password') {
+      } else if (error.response.data.message === 'Wrong password') {
         alertMessage({
           titleMessage: 'Failed',
           bodyMessage: 'Old password not match !',
