@@ -394,8 +394,8 @@ function ProfilePage({navigation}) {
                       source={require('../assets/edit.png')}
                       onPress={() =>
                         navigation.navigate('Edit Profile', {
-                          full_name: dataProfile.fullname,
-                          phone_num: dataProfile.phoneNumber,
+                          full_name: dataProfile && dataProfile.length ? dataProfile.fullName : '',
+                          phone_num: dataProfile && dataProfile.length ? dataProfile.phoneNumber : '',
                           getProfile: getProfile,
                         })
                       }
