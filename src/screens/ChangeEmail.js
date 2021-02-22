@@ -18,6 +18,7 @@ import {
   removeData,
   storeData,
   alertMessage,
+  deleteFcmToken,
 } from '../utils';
 import {AuthContext} from '../../context';
 
@@ -164,6 +165,7 @@ function ChangeEmail({navigation}) {
   }
 
   const signOutUser = async () => {
+    await deleteFcmToken();
     const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
     if (dataUser !== null) {

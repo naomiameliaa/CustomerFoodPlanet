@@ -9,6 +9,7 @@ import {
   removeData,
   alertMessage,
   normalize,
+  deleteFcmToken,
 } from '../utils';
 import {AuthContext} from '../../context';
 import SpinnerKit from '../components/SpinnerKit';
@@ -58,6 +59,7 @@ function QRCodeScanner({navigation}) {
   };
 
   const logout = async () => {
+    await deleteFcmToken();
     const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
     if (dataUser !== null) {

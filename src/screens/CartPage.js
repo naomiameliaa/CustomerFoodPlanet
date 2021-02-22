@@ -18,6 +18,7 @@ import {
   alertMessage,
   storeData,
   removeData,
+  deleteFcmToken,
 } from '../utils';
 import ButtonText from '../components/ButtonText';
 import RadioButton from '../components/RadioButton';
@@ -154,6 +155,7 @@ function CartPage({navigation}) {
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
   const logout = async () => {
+    await deleteFcmToken();
     const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
     if (dataUser !== null) {

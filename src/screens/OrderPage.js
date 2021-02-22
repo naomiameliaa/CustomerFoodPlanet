@@ -23,6 +23,7 @@ import {
   alertMessage,
   storeData,
   removeData,
+  deleteFcmToken,
 } from '../utils';
 import {AuthContext} from '../../context';
 
@@ -385,6 +386,7 @@ function OrderPage({navigation}) {
   );
 
   const logout = async () => {
+    await deleteFcmToken();
     const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
     if (dataUser !== null) {

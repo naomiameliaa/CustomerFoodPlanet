@@ -15,6 +15,7 @@ import {
   removeData,
   alertMessage,
   normalize,
+  deleteFcmToken,
 } from '../utils';
 import theme from '../theme';
 import ButtonText from '../components/ButtonText';
@@ -54,6 +55,7 @@ function RatingOrder({navigation, route}) {
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
   const logout = async () => {
+    await deleteFcmToken();
     const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
     if (dataUser !== null) {

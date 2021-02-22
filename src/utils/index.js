@@ -102,3 +102,19 @@ export const saveFcmToken = async () => {
     console.log('Failed', 'No token received');
   }
 };
+
+export const deleteFcmToken = async () => {
+  const fcmToken = await messaging().getToken();
+  if (fcmToken) {
+    const userId = await getUserId();
+    try {
+      const response = await axios.post(
+        `https://food-planet.herokuapp.com/users/removeNotificationToken?userId=${userId}&token=${fcmToken}`,
+      );
+    } catch (error) {
+      console.log(error.response);
+    }
+  } else {
+    console.log('Failed', 'No token received');
+  }
+};

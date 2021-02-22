@@ -17,6 +17,7 @@ import {
   getData,
   alertMessage,
   storeData,
+  deleteFcmToken,
 } from '../utils';
 import theme from '../theme';
 import ButtonText from '../components/ButtonText';
@@ -205,6 +206,7 @@ function ProfilePage({navigation}) {
   };
 
   const logoutUserGuest = async () => {
+    await deleteFcmToken();
     const dataUser = await getDataUser();
     const dataGuest = await getDataGuest();
     if (dataUser !== null) {

@@ -19,6 +19,7 @@ import {
   storeData,
   alertMessage,
   removeData,
+  deleteFcmToken,
 } from '../utils';
 import theme from '../theme';
 import SpinnerKit from '../components/SpinnerKit';
@@ -185,6 +186,7 @@ function HomePage({navigation}) {
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
   const logout = async () => {
+    await deleteFcmToken();
     const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
     if (dataUser !== null) {

@@ -12,7 +12,7 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, removeData, alertMessage} from '../utils';
+import {normalize, getData, removeData, alertMessage, deleteFcmToken} from '../utils';
 import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
@@ -140,6 +140,7 @@ function ChangePassword({navigation}) {
   }
 
   const signOutMember = async () => {
+    await deleteFcmToken();
     const removeLocalData = await removeData('userData');
     if (removeLocalData) {
       signOut();

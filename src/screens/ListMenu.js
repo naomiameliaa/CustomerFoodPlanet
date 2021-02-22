@@ -20,6 +20,7 @@ import {
   getData,
   storeData,
   removeData,
+  deleteFcmToken,
 } from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
 import {AuthContext} from '../../context';
@@ -147,6 +148,7 @@ function ListMenu({route, navigation}) {
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
   const logout = async () => {
+    await deleteFcmToken();
     const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
     if (dataUser !== null) {

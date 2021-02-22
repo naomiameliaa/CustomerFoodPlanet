@@ -11,6 +11,7 @@ import {
   storeData,
   alertMessage,
   normalize,
+  deleteFcmToken,
 } from '../utils';
 import {AuthContext} from '../../context';
 
@@ -157,6 +158,7 @@ function EditProfile({navigation, route}) {
   };
 
   const logout = async () => {
+    await deleteFcmToken();
     const dataUser = await getData('userData');
     const dataGuest = await getData('guestData');
     if (dataUser !== null) {
