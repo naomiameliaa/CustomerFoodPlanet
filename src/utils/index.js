@@ -108,7 +108,7 @@ export const deleteFcmToken = async () => {
   if (fcmToken) {
     const userId = await getUserId();
     try {
-      const response = await axios.post(
+      const response = await axios.delete(
         `https://food-planet.herokuapp.com/users/removeNotificationToken?userId=${userId}&token=${fcmToken}`,
       );
     } catch (error) {
