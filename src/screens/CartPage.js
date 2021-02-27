@@ -7,7 +7,7 @@ import {
   Image,
   FlatList,
   Dimensions,
-  StyleSheet,
+  StyleSheet, Alert, Modal,
 } from 'react-native';
 import axios from 'axios';
 import Title from '../components/Title';
@@ -33,6 +33,9 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: normalize(20),
     marginVertical: normalize(30),
+  },
+  blurBackground: {
+    opacity: 0.2,
   },
   title: {
     fontSize: normalize(26),
@@ -103,17 +106,18 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'space-between',
   },
-  buttonOrderStyle: {
+  continuePaymentBtn: {
     fontSize: 18,
     color: theme.colors.off_white,
     fontWeight: 'bold',
   },
-  orderWrapperStyle: {
+  continuePaymentWrapper: {
     padding: 16,
     backgroundColor: theme.colors.red,
     width: '70%',
     borderRadius: 30,
-    marginTop: normalize(60),
+    marginTop: normalize(30),
+    marginBottom: normalize(10),
     alignSelf: 'center',
   },
   cartContainer: {
@@ -138,20 +142,89 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
   },
+  scrollStyle: {
+    marginBottom: 100,
+  },
+});
+const stylesModal = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    width: '80%',
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  buttonTxtStyle: {
+    fontSize: normalize(14),
+    color: theme.colors.off_white,
+    fontWeight: 'bold',
+  },
+  btnWrapperStyle: {
+    padding: normalize(10),
+    backgroundColor: theme.colors.red,
+    width: '48%',
+    borderRadius: 30,
+    marginTop: normalize(20),
+    alignSelf: 'center',
+  },
+  contentContainer: {
+    marginBottom: normalize(30),
+  },
+  horizontalWrapper: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  titleStyle: {
+    width: '50%',
+    fontWeight: 'bold',
+    fontSize: normalize(16),
+    textAlign: 'center',
+    paddingVertical: 5,
+  },
+  textStyle: {
+    fontSize: normalize(20),
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
 });
 
-const options = [
+const optionsPayment = [
   {
-    key: 'digitalPay',
-    text: 'Digital Payment',
+    key: 'ovo',
+    text: 'OVO',
+  },
+  {
+    key: 'gopay',
+    text: 'GoPay',
+  },
+  {
+    key: 'dana',
+    text: 'DANA',
   },
 ];
 
 function CartPage({navigation}) {
   const [cartData, setCartData] = React.useState(null);
-  const [value, setValue] = React.useState(null);
+  const [paymentValue, setPaymentValue] = React.useState(null);
   const [seatCapacity, onChangeSeatCapacity] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const [modalVisible, setModalVisible] = React.useState(false);
   const {signOutGuest, signOut} = React.useContext(AuthContext);
 
   const logout = async () => {
@@ -251,8 +324,8 @@ function CartPage({navigation}) {
     setIsLoading(false);
   }
 
-  const validationOrder = () => {
-    if (seatCapacity.length === 0 || seatCapacity === 0 || value === null) {
+  const validationPayment = () => {
+    if (seatCapacity.length === 0 || seatCapacity === 0 || paymentValue === null) {
       alertMessage({
         titleMessage: 'Warning !',
         bodyMessage: 'Seat Capacity & Payment must be filled',
@@ -267,16 +340,21 @@ function CartPage({navigation}) {
         btnCancel: false,
       });
     } else {
-      order();
-      setCartData(null);
-      setValue(null);
-      onChangeSeatCapacity('');
+      setModalVisible(true);
     }
+  }
+
+  const validationOrder = () => {
+    order();
+    setCartData(null);
+    setPaymentValue(null);
+    onChangeSeatCapacity('');
+    setModalVisible(false);
   };
 
-  const onClickRadio = (id) => {
-    setValue(id);
-  };
+  const onClickPayment = (id) => {
+    setPaymentValue(id);
+  }
 
   async function order() {
     setIsLoading(true);
@@ -382,9 +460,9 @@ function CartPage({navigation}) {
               </Text>
             </View>
           ) : (
-            <View>
+            <View style={modalVisible && styles.blurBackground}>
               <Title text="My Cart" txtStyle={styles.title} />
-              <ScrollView>
+              <ScrollView style={styles.scrollStyle}>
                 <FlatList
                   data={cartData.orderList}
                   renderItem={({item, index}) => renderItem({item, index})}
@@ -411,9 +489,9 @@ function CartPage({navigation}) {
                 </View>
                 <Text style={styles.subTitleStyle}>Payment Method</Text>
                 <RadioButton
-                  options={options}
-                  onClick={onClickRadio}
-                  value={value}
+                  options={optionsPayment}
+                  onClick={onClickPayment}
+                  value={paymentValue}
                 />
                 <View style={styles.horizontalWrapper}>
                   <Text style={styles.subTitleStyle}>
@@ -424,17 +502,49 @@ function CartPage({navigation}) {
                   </Text>
                 </View>
                 <ButtonText
-                  title="Place Order"
-                  txtStyle={styles.buttonOrderStyle}
-                  wrapperStyle={styles.orderWrapperStyle}
+                  title="Continue Payment"
+                  txtStyle={styles.continuePaymentBtn}
+                  wrapperStyle={styles.continuePaymentWrapper}
                   isLoading={isLoading}
-                  onPress={validationOrder}
+                  onPress={validationPayment}
                 />
               </ScrollView>
             </View>
           )}
         </View>
       )}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+        }}>
+        <View style={stylesModal.centeredView}>
+          <View style={stylesModal.modalView}>
+            <View style={stylesModal.contentContainer}>
+              <Text style={stylesModal.textStyle}>Please complete your payment !</Text>
+            </View>
+            <View style={stylesModal.horizontalWrapper}>
+              <ButtonText
+                title="Back"
+                txtStyle={stylesModal.buttonTxtStyle}
+                wrapperStyle={stylesModal.btnWrapperStyle}
+                onPress={() => {
+                  setModalVisible(!modalVisible);
+                }}
+              />
+              <ButtonText
+                title="Place Order"
+                txtStyle={stylesModal.buttonTxtStyle}
+                wrapperStyle={stylesModal.btnWrapperStyle}
+                isLoading={isLoading}
+                onPress={validationOrder}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

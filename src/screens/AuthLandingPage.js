@@ -143,6 +143,7 @@ function AuthLandingPage({navigation}) {
         guestIn();
       }
     } catch (error) {
+      console.log(error.response);
       alertMessage({
         titleMessage: 'Error',
         bodyMessage: 'Login Error. Please try again later!',
